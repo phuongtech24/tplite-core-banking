@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: tplite-core-banking
+
+  # 1. Cấu hình kết nối DB
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tplite_db
+    username: postgres
+    password: 123456 # Điền pass DB của em vào đây
+    driver-class-name: org.postgresql.Driver
+
+  # 2. Cấu hình Hibernate (Tự động tạo bảng & In log SQL)
+  jpa:
+    hibernate:
+      ddl-auto: update # Quan trọng: Spring sẽ tự lấy class Account tạo thành table accounts
+    show-sql: true     # Bật để xem Hibernate sinh ra câu lệnh SQL gì
+    properties:
+      hibernate:
+        format_sql: true # Định dạng lại SQL cho dễ đọc
+        highlight_sql: true # Tô màu SQL trong console
+
+# 3. Bật Log chuyên sâu để thấy rõ luồng ACID
+logging:
+  level:
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.transaction: DEBUG
