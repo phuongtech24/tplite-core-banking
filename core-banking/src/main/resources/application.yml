@@ -1,6 +1,10 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: tplite-core-banking
+
 
   # 1. Cấu hình kết nối DB
   datasource:
