@@ -1,5 +1,7 @@
 package com.tplite.core_banking.module.transfer.service.impl;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +28,12 @@ public class TransferServiceImpl implements TransferService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TransferDto transferMoney(TransferDto request) {
-        // 1. Áp dụng Lock Order để chống Deadlock
-        Long minId = Math.min(request.getFromAccountId(), request.getToAccountId());
-        Long maxId = Math.max(request.getFromAccountId(), request.getToAccountId());
+        // 1. Áp dụng Lock Order để chống Deadlock bằng cách so sánh UUID
+        UUID fromId = request.getFromAccountId();
+        UUID toId = request.getToAccountId();
+        
+        UUID minId = fromId.compareTo(toId) < 0 ? fromId : toId;
+        UUID maxId = fromId.compareTo(toId) > 0 ? fromId : toId;
 
         // Lock record có ID nhỏ hơn trước
         Account firstLock = accountRepository.findByIdWithLock(minId)

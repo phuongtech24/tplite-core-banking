@@ -8,14 +8,15 @@ import org.springframework.stereotype.Repository;
 import com.tplite.core_banking.module.account.entity.Account;
 
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 
 @Repository
-public interface AccountRepository extends JpaRepository<Account, Long> {
+public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Account a WHERE a.id = :id")
-    Optional<Account> findByIdWithLock(@Param("id") Long id);
+    Optional<Account> findByIdWithLock(@Param("id") UUID id);
     
 }

@@ -2,6 +2,7 @@ package com.tplite.core_banking.module.transfer.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.tplite.core_banking.module.transfer.entity.Transaction;
 import com.tplite.core_banking.module.transfer.entity.TransactionStatus;
@@ -12,13 +13,13 @@ import jakarta.validation.constraints.NotNull;
 
 public class TransferDto {
 
-    private Long transactionId;
+    private UUID transactionId;
 
     @NotNull(message = "Tài khoản chuyển không được để trống")
-    private Long fromAccountId;
+    private UUID fromAccountId;
 
     @NotNull(message = "Tài khoản nhận không được để trống")
-    private Long toAccountId;
+    private UUID toAccountId;
 
     @NotNull(message = "Số tiền không được để trống")
     @DecimalMin(value = "1.0", message = "Số tiền chuyển phải lớn hơn 0")
@@ -42,27 +43,27 @@ public class TransferDto {
         return dto;
     }
 
-    public Long getTransactionId() {
+    public UUID getTransactionId() {
         return transactionId;
     }
 
-    public void setTransactionId(Long transactionId) {
+    public void setTransactionId(UUID transactionId) {
         this.transactionId = transactionId;
     }
 
-    public Long getFromAccountId() {
+    public UUID getFromAccountId() {
         return fromAccountId;
     }
 
-    public void setFromAccountId(Long fromAccountId) {
+    public void setFromAccountId(UUID fromAccountId) {
         this.fromAccountId = fromAccountId;
     }
 
-    public Long getToAccountId() {
+    public UUID getToAccountId() {
         return toAccountId;
     }
 
-    public void setToAccountId(Long toAccountId) {
+    public void setToAccountId(UUID toAccountId) {
         this.toAccountId = toAccountId;
     }
 
