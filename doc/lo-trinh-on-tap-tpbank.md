@@ -9,16 +9,23 @@
 ## 📋 Tổng Quan Lộ Trình
 
 ```
-Java Core  →  Spring Boot  →  Database (ACID/Index/Lock)  →  MSA Cơ Bản  →  DSA Song Song  →  Mock Interview
+Java Core  →  Spring Boot  →  Database (ACID/Index/Lock)  →  MSA Cơ Bản (hiểu là đủ)  →  DSA Song Song  →  Mock Interview
 ```
 
-| Tuần | Mục tiêu chính | Giờ/tuần |
-|------|----------------|----------|
-| T1–2 | Java Core vững nền tảng | 12–15h |
-| T3–4 | Spring Boot thực chiến | 12–15h |
-| T5–6 | Database chuyên sâu | 12–15h |
-| T7 | Security & API hoàn chỉnh | 10–12h |
-| T8 | Polish & Mock Interview | 10–12h |
+> 🎯 **Mục tiêu & Chiến lược 2 đợt (cập nhật 09/07/2026):**
+> - **Đợt 1 — Giữa tháng 8 (Công ty level thấp hơn):** Đi thực chiến để *luyện*. Mục đích là quen môi trường phỏng vấn, phát hiện lỗ hổng kiến thức, rút kinh nghiệm. **Không quá áp lực kết quả** — coi như "tập bắn".
+> - **Đợt 2 — Giữa tháng 9 (TPBank):** Mục tiêu chính. Lúc này đã có "máu" từ đợt 1 → tự tin & chín chắn hơn.
+> - **Nguyên tắc xuyên suốt:** *Ôn và Thực hành song song* — mỗi tuần vừa học lý thuyết vừa code dự án BankCore / làm bài tập để kiến thức "nằm trong tay", không chỉ nằm trên giấy.
+
+| Tuần | Thời gian | Mục tiêu chính | Giờ/tuần | Ghi chú |
+|------|-----------|----------------|----------|---------|
+| T1–2 | 09/07 – 22/07 | Java Core vững nền tảng | 12–15h | Ôn + code thuật toán hàng ngày |
+| T3–4 | 23/07 – 05/08 | Spring Boot thực chiến | 12–15h | Gắn chặt vào dự án BankCore |
+| T5–6 | 06/08 – 19/08 | Database chuyên sâu (ACID/Index/Lock) | 12–15h | 🚀 **Đợt 1: Giữa T8 phỏng vấn công ty nhỏ** |
+| T7 | 20/08 – 26/08 | Security & API hoàn chỉnh | 10–12h | Rút kinh nghiệm đợt 1, vá lỗ hổng |
+| T8 | 27/08 – 02/09 | Polish dự án + DSA tăng tốc | 10–12h | |
+| T9 | 03/09 – 09/09 | TPBank deep-dive (DB + Spring hỏi sâu) | 12–15h | Tập trung điểm TPBank hay hỏi |
+| T10 | 10/09 – 16/09 | Mock Interview + chốt | 12–15h | 🎯 **Đợt 2: Giữa T9 phỏng vấn TPBank** |
 
 ---
 
@@ -33,6 +40,20 @@ Java Core  →  Spring Boot  →  Database (ACID/Index/Lock)  →  MSA Cơ Bản
 | **Xuyên suốt** | Nạp kiến thức Core (Java, Spring, DB) — lồng ghép khi cần |
 
 > **Nguyên tắc:** Mỗi bug fix = 1 session học hiệu quả nhất. Ghi note 3 dòng: **Vấn đề → Nguyên nhân → Giải pháp**
+
+### 🔁 Nguyên Tắc "Ôn + Thực Hành Song Song" (Quan Trọng Nhất)
+
+> Học lý thuyết không thôi = **nhanh quên**. Phải code ngay để kiến thức "nằm trong tay".
+
+| Hoạt động | Tần suất | Cách làm |
+|-----------|----------|----------|
+| Ôn lý thuyết (đọc note/file này) | Hàng ngày 30p | Đọc 1 mục, tự nhớ lại bằng miệng trước khi xem đáp án |
+| Code dự án BankCore | Mỗi ngày 08:00–09:30 | Áp dụng đúng kiến thức đang học (vd: đang học Lock → refactor `TransferService`) |
+| Làm 1–3 bài LeetCode | Hàng ngày (xen kẽ) | Theo lộ trình DSA ở PHẦN V |
+| Viết lại code từ đầu (không copy) | Cuối tuần mỗi phần | Code lại `TransferService`, `Account` để nhớ sâu |
+| Tự hỏi – tự trả lời (mock) | 2–3 lần/tuần | Đóng vai phỏng vấn, ghi âm để biết mình diễn đạt thế nào |
+
+> 💡 **Mẹo thực hành tận mắt:** Mỗi khi học 1 khái niệm (vd: Isolation Level) → lập tức mở PostgreSQL thực hành `SET TRANSACTION ISOLATION LEVEL ...` để **tận mắt thấy** Dirty Read / Non-repeatable Read. Học Lock → chạy 2 tab psql cùng UPDATE 1 row để thấy block/deadlock.
 
 ---
 
@@ -250,9 +271,97 @@ Account first  = accountRepo.findByIdWithLock(minId).orElseThrow(...);
 Account second = accountRepo.findByIdWithLock(maxId).orElseThrow(...);
 ```
 
+### 🧩 Plan Tích Hợp JTA vào Module Transfer (Dự phòng mở rộng)
+
+> **Bối cảnh hiện tại:** `TransferServiceImpl.transferMoney()` dùng **local transaction** (`@Transactional` của Spring + 1 PostgreSQL datasource). Điều này **đủ và đúng** khi chuyển tiền trong **cùng 1 database**.
+> Nếu sau này mở rộng sang **nhiều nguồn tài nguyên** (2 DB khác nhau, hoặc DB + Message Queue), ta cần **JTA (XA Transaction)** để đảm bảo "all-or-nothing" xuyên resource.
+
+#### 1. Khi nào THỰC SỰ cần JTA
+
+| Kịch bản | Có cần JTA (XA)? |
+|----------|------------------|
+| Chuyển tiền trong 1 DB (hiện tại) | ❌ Local transaction là đủ |
+| Chuyển tiền giữa 2 DB khác nhau | ✅ Cần XA |
+| DB + ghi Kafka/RabbitMQ (outbox) | ✅ Cần XA (hoặc SAGA) |
+| Gọi API ngân hàng đối tác (qua mạng) | ❌ Dùng SAGA, **không** dùng JTA |
+
+#### 2. Các bước tích hợp (Plan chi tiết)
+
+**Bước 1 — Thêm dependency JTA (dùng Atomikos cho app standalone)**
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jta-atomikos</artifactId>
+</dependency>
+```
+> Spring Boot sẽ **tự động** cấu hình `JtaTransactionManager` thay cho `DataSourceTransactionManager` khi phát hiện JTA starter.
+
+**Bước 2 — Cấu hình XA DataSource(s) trong `application.yml`**
+```yaml
+spring:
+  jta:
+    log-dir: ./jta-logs                 # Recovery log khi TM crash
+    transaction-manager-id: tplite-bankcore
+  datasource:
+    source:                             # DB tài khoản nguồn
+      xa:
+        properties:
+          URL: jdbc:postgresql://localhost:5432/tplite_db
+          user: postgres
+          password: 123456
+    target:                             # DB tài khoản đích / ledger
+      xa:
+        properties:
+          URL: jdbc:postgresql://localhost:5432/tplite_ledger_db
+          user: postgres
+          password: 123456
+```
+
+**Bước 3 — Khai báo XADataSource + EntityManagerFactory dùng JTA**
+```java
+@Configuration
+public class JtaConfig {
+    @Bean
+    public DataSource sourceDataSource() {
+        AtomikosDataSourceBean ds = new AtomikosDataSourceBean();
+        ds.setXaDataSourceClassName("org.postgresql.xa.PGXADataSource");
+        // set URL/user/password ...
+        return ds; // XA-capable connection
+    }
+
+    // EntityManagerFactory cho mỗi datasource phải trỏ về JtaTransactionManager
+    // (Spring Boot auto-config nếu đặt tên chuẩn: sourceEntityManagerFactory, ...)
+}
+```
+
+**Bước 4 — Sửa `TransferService` (giữ nguyên annotation, đổi nền tảng)**
+```java
+@Override
+@Transactional(rollbackFor = Exception.class) // Giờ là JTA/XA transaction
+public TransferDto transferMoney(TransferDto request) {
+    // Lock order + kiểm tra số dư + business logic GIỮ NGUYÊN
+    // Chỉ khác: transaction giờ quản lý 2 XA datasource
+    // Nếu 1 trong 2 DB lỗi → cả 2 rollback (qua 2PC)
+}
+```
+
+#### 3. Trade-off cần biết (phỏng vấn hay hỏi)
+
+- **2PC (Two-Phase Commit)** chậm hơn local transaction (có thêm phase *prepare*).
+- Resource bị khóa lâu hơn → throughput giảm, nguy cơ contention tăng.
+- Nếu Transaction Manager crash giữa chừng → cần **recovery log** (Atomikos ghi vào `jta-logs`).
+- **Alternative:** **SAGA pattern** (choreography qua event / orchestration qua coordinator) — không khóa resource, nhưng bắt buộc phải có **compensation** (hoàn tác) khi 1 bước thất bại.
+
+#### 4. Quyết định đề xuất
+
+> Với dự án BankCore hiện tại (1 DB duy nhất), **KHÔNG cần JTA** — local transaction + Pessimistic Lock đã đảm bảo ACID và chống deadlock tốt.
+> Chỉ tích hợp JTA khi có kịch bản **đa nguồn tài nguyên cùng DB** thực tế. Nếu gọi hệ thống bên ngoài (API đối tác, thanh toán quốc tế), ưu tiên **SAGA** thay vì JTA vì không thể rollback được remote call.
+
 ---
 
-## 🔷 PHẦN IV — MSA Cơ Bản (Hiểu Khái Niệm Là Đủ)
+## 🔷 PHẦN IV — MSA Cơ Bản (Hiểu Khái Niệm Là Đủ — KHÔNG cần áp dụng thực tế)
+
+> ⚠️ **Lưu ý cho mục tiêu Junior:** Phần này **chỉ cần hiểu khái niệm** để trả lời phỏng vấn. KHÔNG cần code MSA, không cần tách service, không cần Docker/K8s phức tạp. Tập trung thời gian vào **Java Core + Spring + Database** (trọng tâm TPBank). Chỉ làm sâu hơn nếu có hứng thú, không bắt buộc.
 
 | Câu hỏi phỏng vấn | Trả lời ngắn gọn |
 |-------------------|------------------|
