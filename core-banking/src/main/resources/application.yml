@@ -34,3 +34,11 @@ logging:
   level:
     org.springframework.orm.jpa: DEBUG
     org.springframework.transaction: DEBUG
+
+app:
+  security:
+    jwt:
+      secret: dev-only-jwt-secret-key-change-me-please-32-bytes-minimum
+      expiration-millis: 900000
+    refresh-token:
+      expiration-days: 7

@@ -1,20 +1,31 @@
 package com.tplite.core_banking.module.auth.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tplite.core_banking.module.auth.dto.AuthResponse;
 import com.tplite.core_banking.module.auth.dto.LoginRequest;
+import com.tplite.core_banking.module.auth.dto.RefreshTokenRequest;
 import com.tplite.core_banking.module.auth.dto.RegisterRequest;
+import com.tplite.core_banking.module.auth.entity.RefreshToken;
 import com.tplite.core_banking.module.auth.entity.Role;
 import com.tplite.core_banking.module.auth.entity.UserRole;
+import com.tplite.core_banking.module.auth.repository.RefreshTokenRepository;
 import com.tplite.core_banking.module.auth.repository.RoleRepository;
 import com.tplite.core_banking.module.auth.repository.UserRoleRepository;
+import com.tplite.core_banking.module.auth.security.JwtService;
 import com.tplite.core_banking.module.auth.service.AuthService;
 import com.tplite.core_banking.module.user.entity.User;
 import com.tplite.core_banking.module.user.repository.UserRepository;
@@ -26,35 +37,76 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
+    private final JwtService jwtService;
+    private final int refreshTokenExpirationDays;
 
     public AuthServiceImpl(
             UserRepository userRepository,
             RoleRepository roleRepository,
             UserRoleRepository userRoleRepository,
-            PasswordEncoder passwordEncoder
+            RefreshTokenRepository refreshTokenRepository,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            UserDetailsService userDetailsService,
+            JwtService jwtService,
+            @Value("${app.security.refresh-token.expiration-days}") int refreshTokenExpirationDays
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
+        this.jwtService = jwtService;
+        this.refreshTokenExpirationDays = refreshTokenExpirationDays;
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Invalid email or password");
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        String accessToken = jwtService.generateToken(userDetails);
+        String refreshToken = createRefreshToken(user);
+
+        return buildAuthResponse(user, getRoleNames(user), accessToken, refreshToken);
+    }
+
+    @Override
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(request.getRefreshToken())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+
+        if (refreshToken.isRevoked() || refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Refresh token is expired or revoked");
         }
 
-        return new AuthResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                getRoleNames(user)
-        );
+        User user = refreshToken.getUser();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        String accessToken = jwtService.generateToken(userDetails);
+
+        return buildAuthResponse(user, getRoleNames(user), accessToken, refreshToken.getToken());
+    }
+
+    @Override
+    @Transactional
+    public void logout(RefreshTokenRequest request) {
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(request.getRefreshToken())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+
+        refreshToken.setRevoked(true);
+        refreshToken.setRevokedAt(LocalDateTime.now());
+        refreshTokenRepository.save(refreshToken);
     }
 
     @Override
@@ -98,5 +150,26 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return roles;
+    }
+
+    private String createRefreshToken(User user) {
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUser(user);
+        refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setExpiresAt(LocalDateTime.now().plusDays(refreshTokenExpirationDays));
+        return refreshTokenRepository.save(refreshToken).getToken();
+    }
+
+    private AuthResponse buildAuthResponse(User user, Set<String> roles, String accessToken, String refreshToken) {
+        return new AuthResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                roles,
+                accessToken,
+                refreshToken,
+                "Bearer",
+                jwtService.getExpirationSeconds()
+        );
     }
 }
