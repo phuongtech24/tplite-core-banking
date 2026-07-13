@@ -1,10 +1,15 @@
 package com.tplite.core_banking.module.auth.service.impl;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tplite.core_banking.module.auth.dto.AuthResponse;
+import com.tplite.core_banking.module.auth.dto.LoginRequest;
 import com.tplite.core_banking.module.auth.dto.RegisterRequest;
 import com.tplite.core_banking.module.auth.entity.Role;
 import com.tplite.core_banking.module.auth.entity.UserRole;
@@ -36,6 +41,23 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        return new AuthResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                getRoleNames(user)
+        );
+    }
+
+    @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -61,8 +83,20 @@ public class AuthServiceImpl implements AuthService {
                 savedUser.getId(),
                 savedUser.getEmail(),
                 savedUser.getFullName(),
-                customerRole.getName()
+                Set.of(customerRole.getName())
         );
     }
 
+    private Set<String> getRoleNames(User user) {
+        Set<String> roles = userRoleRepository.findByUserId(user.getId())
+                .stream()
+                .map(userRole -> userRole.getRole().getName())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (roles.isEmpty()) {
+            throw new IllegalStateException("User has no role");
+        }
+
+        return roles;
+    }
 }
