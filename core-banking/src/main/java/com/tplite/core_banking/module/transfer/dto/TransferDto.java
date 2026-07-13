@@ -10,33 +10,48 @@ import com.tplite.core_banking.module.transfer.entity.TransactionType;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class TransferDto {
-
     private UUID transactionId;
+    private String transactionCode;
 
-    @NotNull(message = "Tài khoản chuyển không được để trống")
+    @NotNull(message = "From account is required")
     private UUID fromAccountId;
 
-    @NotNull(message = "Tài khoản nhận không được để trống")
+    @NotNull(message = "To account is required")
     private UUID toAccountId;
 
-    @NotNull(message = "Số tiền không được để trống")
-    @DecimalMin(value = "1.0", message = "Số tiền chuyển phải lớn hơn 0")
+    private String fromAccountNumber;
+    private String toAccountNumber;
+
+    @NotNull(message = "Amount is required")
+    @DecimalMin(value = "1.00", message = "Amount must be greater than or equal to 1")
     private BigDecimal amount;
+
+    private String currency;
+
+    @Size(max = 255, message = "Description must not exceed 255 characters")
+    private String description;
 
     private TransactionType type;
     private TransactionStatus status;
     private LocalDateTime createdAt;
 
-    public TransferDto() {}
+    public TransferDto() {
+    }
 
     public static TransferDto fromEntity(Transaction transaction) {
         TransferDto dto = new TransferDto();
         dto.setTransactionId(transaction.getId());
+        dto.setTransactionCode(transaction.getTransactionCode());
         dto.setFromAccountId(transaction.getFromAccount().getId());
         dto.setToAccountId(transaction.getToAccount().getId());
+        dto.setFromAccountNumber(transaction.getFromAccount().getAccountNumber());
+        dto.setToAccountNumber(transaction.getToAccount().getAccountNumber());
         dto.setAmount(transaction.getAmount());
+        dto.setCurrency(transaction.getCurrency());
+        dto.setDescription(transaction.getDescription());
         dto.setType(transaction.getType());
         dto.setStatus(transaction.getStatus());
         dto.setCreatedAt(transaction.getCreatedAt());
@@ -49,6 +64,14 @@ public class TransferDto {
 
     public void setTransactionId(UUID transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public String getTransactionCode() {
+        return transactionCode;
+    }
+
+    public void setTransactionCode(String transactionCode) {
+        this.transactionCode = transactionCode;
     }
 
     public UUID getFromAccountId() {
@@ -67,12 +90,44 @@ public class TransferDto {
         this.toAccountId = toAccountId;
     }
 
+    public String getFromAccountNumber() {
+        return fromAccountNumber;
+    }
+
+    public void setFromAccountNumber(String fromAccountNumber) {
+        this.fromAccountNumber = fromAccountNumber;
+    }
+
+    public String getToAccountNumber() {
+        return toAccountNumber;
+    }
+
+    public void setToAccountNumber(String toAccountNumber) {
+        this.toAccountNumber = toAccountNumber;
+    }
+
     public BigDecimal getAmount() {
         return amount;
     }
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public TransactionType getType() {
