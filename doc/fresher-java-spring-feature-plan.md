@@ -14,6 +14,9 @@ Da lam:
 - Logout bang cach revoke refresh token.
 - Load role/permission tu DB qua `CustomUserDetailsService`.
 - Gan JWT filter truoc `UsernamePasswordAuthenticationFilter`.
+- Chuan hoa loi security: 401 khi chua login/sai token, 403 khi khong du quyen.
+- Them `GlobalExceptionHandler` cho validation, duplicate, business error.
+- Them endpoint test RBAC tai `/api/security-test/**`.
 
 Can on de phong van:
 - Vi sao password phai hash, khong ma hoa 2 chieu.

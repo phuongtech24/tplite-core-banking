@@ -15,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tplite.core_banking.common.exception.BusinessException;
+import com.tplite.core_banking.common.exception.DuplicateResourceException;
+import com.tplite.core_banking.common.exception.ResourceNotFoundException;
 import com.tplite.core_banking.module.auth.dto.AuthResponse;
 import com.tplite.core_banking.module.auth.dto.LoginRequest;
 import com.tplite.core_banking.module.auth.dto.RefreshTokenRequest;
@@ -85,10 +88,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse refreshToken(RefreshTokenRequest request) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(request.getRefreshToken())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+                .orElseThrow(() -> new BusinessException("Invalid refresh token"));
 
         if (refreshToken.isRevoked() || refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Refresh token is expired or revoked");
+            throw new BusinessException("Refresh token is expired or revoked");
         }
 
         User user = refreshToken.getUser();
@@ -102,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void logout(RefreshTokenRequest request) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(request.getRefreshToken())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+                .orElseThrow(() -> new BusinessException("Invalid refresh token"));
 
         refreshToken.setRevoked(true);
         refreshToken.setRevokedAt(LocalDateTime.now());
@@ -113,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new DuplicateResourceException("Email already exists");
         }
 
         User user = new User(
@@ -124,7 +127,7 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(user);
 
         Role customerRole = roleRepository.findByName(DEFAULT_ROLE)
-                .orElseThrow(() -> new IllegalStateException("Default role CUSTOMER is missing. Check Flyway seed data."));
+                .orElseThrow(() -> new ResourceNotFoundException("Default role CUSTOMER is missing. Check Flyway seed data."));
 
         UserRole userRole = new UserRole();
         userRole.setUser(savedUser);
@@ -146,7 +149,7 @@ public class AuthServiceImpl implements AuthService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         if (roles.isEmpty()) {
-            throw new IllegalStateException("User has no role");
+            throw new BusinessException("User has no role");
         }
 
         return roles;
