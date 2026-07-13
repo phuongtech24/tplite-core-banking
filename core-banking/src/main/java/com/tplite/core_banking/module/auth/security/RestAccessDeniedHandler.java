@@ -32,7 +32,12 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(
                 response.getWriter(),
-                ApiResponse.error(HttpStatus.FORBIDDEN.value(), "Access denied")
+                ApiResponse.error(
+                        HttpStatus.FORBIDDEN.value(),
+                        "ACCESS_DENIED",
+                        "Access denied",
+                        request.getRequestURI()
+                )
         );
     }
 }

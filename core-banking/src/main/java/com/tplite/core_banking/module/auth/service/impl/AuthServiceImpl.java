@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +37,7 @@ import com.tplite.core_banking.module.user.repository.UserRepository;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
     private static final String DEFAULT_ROLE = "CUSTOMER";
 
     private final UserRepository userRepository;
@@ -82,6 +85,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateToken(userDetails);
         String refreshToken = createRefreshToken(user);
 
+        log.info("User logged in successfully: {}", user.getEmail());
         return buildAuthResponse(user, getRoleNames(user), accessToken, refreshToken);
     }
 
@@ -98,6 +102,7 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtService.generateToken(userDetails);
 
+        log.info("Access token refreshed for user: {}", user.getEmail());
         return buildAuthResponse(user, getRoleNames(user), accessToken, refreshToken.getToken());
     }
 
@@ -110,6 +115,7 @@ public class AuthServiceImpl implements AuthService {
         refreshToken.setRevoked(true);
         refreshToken.setRevokedAt(LocalDateTime.now());
         refreshTokenRepository.save(refreshToken);
+        log.info("Refresh token revoked for user id: {}", refreshToken.getUser().getId());
     }
 
     @Override
@@ -134,6 +140,7 @@ public class AuthServiceImpl implements AuthService {
         userRole.setRole(customerRole);
         userRoleRepository.save(userRole);
 
+        log.info("User registered successfully: {}", savedUser.getEmail());
         return new AuthResponse(
                 savedUser.getId(),
                 savedUser.getEmail(),

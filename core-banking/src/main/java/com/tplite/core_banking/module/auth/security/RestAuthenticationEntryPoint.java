@@ -32,7 +32,12 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(
                 response.getWriter(),
-                ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Authentication is required")
+                ApiResponse.error(
+                        HttpStatus.UNAUTHORIZED.value(),
+                        "AUTHENTICATION_REQUIRED",
+                        "Authentication is required",
+                        request.getRequestURI()
+                )
         );
     }
 }
