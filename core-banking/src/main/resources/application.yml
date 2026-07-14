@@ -27,7 +27,7 @@ spring:
 
   # 1. Cấu hình kết nối DB
   datasource:
-    url: jdbc:postgresql://localhost:5432/tplite_db
+    url: jdbc:postgresql://localhost:5432/tplite_core_banking_dev
     username: postgres
     password: 123456 # Điền pass DB của em vào đây
     driver-class-name: org.postgresql.Driver
