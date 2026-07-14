@@ -152,6 +152,42 @@ public class Account {
         return getBalance().subtract(getFrozenAmount());
     }
 
+    public void hold(BigDecimal amount) {
+        validatePositiveAmount(amount);
+        if (getAvailableBalance().compareTo(amount) < 0) {
+            throw new IllegalStateException("Insufficient available balance");
+        }
+        this.frozenAmount = getFrozenAmount().add(amount);
+    }
+
+    public void clear(BigDecimal amount) {
+        validatePositiveAmount(amount);
+        if (getFrozenAmount().compareTo(amount) < 0) {
+            throw new IllegalStateException("Frozen amount is not enough to clear");
+        }
+        this.frozenAmount = getFrozenAmount().subtract(amount);
+        this.balance = getBalance().subtract(amount);
+    }
+
+    public void release(BigDecimal amount) {
+        validatePositiveAmount(amount);
+        if (getFrozenAmount().compareTo(amount) < 0) {
+            throw new IllegalStateException("Frozen amount is not enough to release");
+        }
+        this.frozenAmount = getFrozenAmount().subtract(amount);
+    }
+
+    public void credit(BigDecimal amount) {
+        validatePositiveAmount(amount);
+        this.balance = getBalance().add(amount);
+    }
+
+    private void validatePositiveAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+    }
+
     public AccountStatus getStatus() {
         return status;
     }

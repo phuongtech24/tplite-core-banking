@@ -154,3 +154,53 @@ Credit A 1,000,000
 - Them rule maker/checker cho KYC va loan.
 - Them job reconciliation demo cho transaction pending.
 - Them API reversal demo neu can trinh bay sau.
+
+## Trang thai ap dung trong TPLite hien tai
+
+Project dang code phan nen tang can demo truc tiep:
+
+- `Account.balance`: ledger balance.
+- `Account.frozenAmount`: so tien dang hold.
+- `Account.getAvailableBalance()`: tinh `balance - frozenAmount`.
+- `Account.hold(amount)`: phong toa tien, tang `frozenAmount`.
+- `Account.clear(amount)`: tru ledger balance va giam `frozenAmount`.
+- `Account.release(amount)`: giai phong hold neu giao dich fail/timeout.
+- `Account.credit(amount)`: cong tien vao tai khoan thu huong.
+
+Luon chuyen tien noi bo hien tai:
+
+```text
+lock account A/B
+validate owner/status/currency/available balance
+create Transaction PENDING
+fromAccount.hold(amount)
+fromAccount.clear(amount)
+toAccount.credit(amount)
+mark Transaction SUCCESS
+```
+
+Vi la internal transfer demo nen `HOLD -> CLEAR` dien ra trong cung mot `@Transactional`. Sau nay neu lam external transfer:
+
+```text
+API transfer external:
+  lock account
+  hold(amount)
+  create Transaction PENDING
+  publish Kafka message
+
+Webhook success:
+  lock account
+  clear(amount)
+  mark SUCCESS
+
+Webhook failed/timeout:
+  lock account
+  release(amount)
+  mark FAILED
+```
+
+Phan chua code full, chi can nam ly thuyet luc nay:
+
+- General ledger double-entry.
+- Reconciliation/EOD.
+- Reversal transaction.

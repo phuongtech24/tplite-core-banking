@@ -1,6 +1,5 @@
 package com.tplite.core_banking.module.transfer.service.impl;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -85,19 +84,12 @@ public class TransferServiceImpl implements TransferService {
 
         validateTransfer(user, fromAccount, toAccount, request);
 
-        holdAmount(fromAccount, request.getAmount());
-        clearHeldDebit(fromAccount, request.getAmount());
-        toAccount.setBalance(toAccount.getBalance().add(request.getAmount()));
-
-        accountRepository.save(fromAccount);
-        accountRepository.save(toAccount);
-
         Transaction transaction = new Transaction(
                 fromAccount,
                 toAccount,
                 request.getAmount(),
                 TransactionType.TRANSFER,
-                TransactionStatus.SUCCESS
+                TransactionStatus.PENDING
         );
         transaction.setTransactionCode(generateUniqueTransactionCode());
         transaction.setIdempotencyKey(normalizedKey);
@@ -105,7 +97,17 @@ public class TransferServiceImpl implements TransferService {
         transaction.setDescription(request.getDescription());
         transaction.setCreatedBy(user);
 
-        Transaction savedTransaction = transactionRepository.save(transaction);
+        fromAccount.hold(request.getAmount());
+        Transaction pendingTransaction = transactionRepository.save(transaction);
+
+        fromAccount.clear(request.getAmount());
+        toAccount.credit(request.getAmount());
+        pendingTransaction.setStatus(TransactionStatus.SUCCESS);
+
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);
+
+        Transaction savedTransaction = transactionRepository.save(pendingTransaction);
         createTransferNotifications(fromAccount, toAccount, savedTransaction);
         auditLogService.record(user, "TRANSFER_CREATE", "TRANSACTION", savedTransaction.getId(), "Transfer completed");
         log.info("Transfer completed: transactionId={}, fromAccountId={}, toAccountId={}, amount={}",
@@ -149,21 +151,6 @@ public class TransferServiceImpl implements TransferService {
         if (fromAccount.getAvailableBalance().compareTo(request.getAmount()) < 0) {
             throw new BusinessException("Insufficient balance");
         }
-    }
-
-    private void holdAmount(Account account, BigDecimal amount) {
-        if (account.getAvailableBalance().compareTo(amount) < 0) {
-            throw new BusinessException("Insufficient available balance");
-        }
-        account.setFrozenAmount(account.getFrozenAmount().add(amount));
-    }
-
-    private void clearHeldDebit(Account account, BigDecimal amount) {
-        if (account.getFrozenAmount().compareTo(amount) < 0) {
-            throw new BusinessException("Frozen amount is not enough to clear");
-        }
-        account.setFrozenAmount(account.getFrozenAmount().subtract(amount));
-        account.setBalance(account.getBalance().subtract(amount));
     }
 
     private String normalizeIdempotencyKey(String idempotencyKey) {
