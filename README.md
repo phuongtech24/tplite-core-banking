@@ -1,111 +1,250 @@
-# 🏦 TPLite - Core Banking System
+# TPLite Core Banking Demo
 
-Dự án mô phỏng hệ thống Ngân hàng Lõi (Core Banking) tập trung vào tính toàn vẹn dữ liệu (ACID), xử lý đồng thời (Concurrency) và bảo mật.
+Day la du an demo de hoc va luyen Java Spring Boot theo huong core banking co ban.
+Muc tieu chinh la nam chac Java Core, OOP, Spring Boot, Spring Security, JPA, database transaction, phan quyen va cach to chuc module backend.
 
-## 🛠️ Tech Stack
+> Luu y: day khong phai he thong ngan hang thuc te. Banking production can rat nhieu lop nghiep vu, bao mat, doi soat, audit, monitoring, compliance va tich hop noi bo phuc tap hon.
 
-| Tầng | Công nghệ |
-|------|-----------|
-| Runtime | Java 21 (LTS) |
-| Framework | Spring Boot 3.2+ |
-| ORM | Spring Data JPA + Hibernate 6.x |
-| Database | PostgreSQL 15+ |
-| Cache | Redis 7+ |
-| Security | Spring Security 6.x + JWT |
-| Migration | Flyway 9+ |
-| Container | Docker + Docker Compose |
-| CI/CD | GitHub Actions |
-| Docs | Swagger / OpenAPI 3 |
+## Tech Stack
 
-## 📦 Modules
+| Nhom | Cong nghe |
+| --- | --- |
+| Language | Java 17 |
+| Framework | Spring Boot 3.5.x |
+| Security | Spring Security, JWT, RBAC/permission |
+| Database | PostgreSQL |
+| ORM | Spring Data JPA, Hibernate |
+| Migration/seed | Flyway, application seed data |
+| Messaging | Apache Kafka, Spring Kafka |
+| API docs | Swagger/OpenAPI with springdoc |
+| CI/CD | GitHub Actions CI |
+| Build/test | Maven, JUnit 5, Mockito |
 
-| Module | Chức năng | Kiến thức áp dụng |
-|--------|-----------|------------------|
-| **auth** | Đăng ký, đăng nhập, JWT | Spring Security, BCrypt, JWT |
-| **account** | Mở tài khoản, xem số dư | JPA, `@Version` Optimistic Lock |
-| **transfer** ⭐ | Chuyển tiền, kiểm tra hạn mức | ACID, Pessimistic Lock, chống Deadlock |
-| **transaction** | Lịch sử GD, filter, phân trang | JPA Specification, Composite Index |
-| **card** | Phát hành thẻ, khóa thẻ | State Machine, `@Transactional` |
-| **loan** | Đăng ký vay, tính lãi suất | Business logic, Scheduled Job |
-| **notification** | Email/SMS sau giao dịch | `@Async`, Event-driven |
-| **admin** | Quản lý user, audit log | Spring AOP, RBAC |
+## Tinh Nang Chinh
 
-## 🗂️ Cấu Trúc Dự Án
+### Auth/Security
 
-```
+- Dang ky, dang nhap, refresh token, logout.
+- Ma hoa password bang BCrypt.
+- JWT authentication filter doc token tu `Authorization: Bearer ...`.
+- `UserDetailsService` load user, role va permission tu database.
+- RBAC/permission voi `hasRole(...)` va `hasAuthority(...)`.
+- Xu ly loi bao mat rieng cho `401 Unauthorized` va `403 Forbidden`.
+
+### User, Customer, KYC
+
+- Xem/cap nhat thong tin ca nhan.
+- Admin/staff tim kiem user co phan trang va keyword.
+- Customer profile va KYC document.
+- Staff/admin duyet hoac tu choi KYC.
+
+### Account, Card
+
+- Tao tai khoan thanh toan cho customer.
+- Xem danh sach tai khoan cua minh.
+- Quan ly trang thai tai khoan.
+- Phan biet `balance`, `frozenAmount`, `availableBalance`.
+- Phat hanh the demo gan voi account.
+- Xem danh sach the cua minh, cap nhat trang thai the.
+
+### Transfer/Transaction
+
+- Chuyen tien giua hai tai khoan.
+- Kiem tra chu so huu, trang thai tai khoan, tien te va so du.
+- Check available balance theo cong thuc `balance - frozenAmount`.
+- Ho tro header `Idempotency-Key` de tranh duplicate transfer.
+- Dung `@Transactional` de dam bao ACID.
+- Dung pessimistic lock va thu tu lock theo UUID de giam nguy co deadlock.
+- Luu lich su giao dich co phan trang.
+
+### Loan
+
+- Quan ly san pham vay mau.
+- Customer tao ho so vay.
+- Staff/admin duyet hoac tu choi ho so vay.
+- Co Strategy Pattern cho tinh lai vay co ban.
+
+### Notification, Audit, Admin
+
+- Tao notification sau cac su kien quan trong.
+- Kafka event cho notification demo.
+- Audit log cho register, login, logout, transfer, loan.
+- Admin dashboard thong ke nhanh tong user, customer, account, card, transaction, loan, notification va audit log.
+
+## Cau Truc Du An
+
+```text
 Bank_Core/
-├── doc/                                         # Tài liệu & lộ trình học
-│   ├── lo-trinh-on-tap-tpbank.md
-│   └── bug-notes.md
-│
-└── core-banking/                                # Spring Boot Application
-    └── src/
-        ├── main/
-        │   ├── java/com/tplite/core_banking/
-        │   │   ├── CoreBankingApplication.java
-        │   │   │
-        │   │   ├── common/                      # Dùng chung toàn app
-        │   │   │   ├── exception/               # Custom exceptions + GlobalExceptionHandler
-        │   │   │   ├── response/                # ApiResponse wrapper
-        │   │   │   └── util/                    # Tiện ích chung
-        │   │   │
-        │   │   ├── config/                      # Cấu hình Spring (Security, Swagger, Async)
-        │   │   ├── security/                    # JWT Filter, UserDetailsService
-        │   │   │
-        │   │   └── module/                      # Business logic theo feature
-        │   │       ├── auth/
-        │   │       │   └── dto/
-        │   │       ├── account/
-        │   │       │   └── dto/
-        │   │       ├── transfer/                # ⭐ Module quan trọng nhất
-        │   │       │   └── dto/
-        │   │       ├── card/
-        │   │       │   └── dto/
-        │   │       ├── loan/
-        │   │       │   └── dto/
-        │   │       ├── notification/
-        │   │       │   └── dto/
-        │   │       └── admin/
-        │   │           └── dto/
-        │   │
-        │   └── resources/
-        │       ├── application.yml
-        │       ├── application-dev.yml
-        │       └── db/migration/                # Flyway SQL scripts (V1__, V2__...)
-        │
-        └── test/
-            └── java/com/tplite/core_banking/
-                ├── module/
-                │   ├── account/                 # Unit tests
-                │   └── transfer/                # Unit tests (quan trọng nhất)
-                └── integration/                 # Integration tests
+|-- core-banking/
+|   |-- src/main/java/com/tplite/core_banking/
+|   |   |-- common/              # response, exception, config, seed data
+|   |   |-- module/
+|   |   |   |-- auth/
+|   |   |   |-- user/
+|   |   |   |-- customer/
+|   |   |   |-- account/
+|   |   |   |-- card/
+|   |   |   |-- transfer/
+|   |   |   |-- loan/
+|   |   |   |-- notification/
+|   |   |   |-- audit/
+|   |   |   |-- admin/
+|   |-- src/main/resources/
+|   |   |-- application.yml
+|   |   |-- db/migration/
+|   |-- src/test/java/
+|-- docker-compose.kafka.yml
+|-- CLAUDE.md
 ```
 
-> **Nguyên tắc tổ chức:** Mọi thứ liên quan đến một feature đều nằm trong cùng một folder module (Controller, Service, Repository, Entity, DTO). Dễ đọc, dễ scale, gần với chuẩn MSA thực tế.
+## Chay Local
 
----
+### 1. Chuan bi PostgreSQL
 
+Tao database sach, vi project dang dung UUID cho id:
 
-## 📌 Quy chuẩn Git Commit (Commit Convention)
-Dự án áp dụng chuẩn **Conventional Commits** để quản lý lịch sử mã nguồn thống nhất, rõ ràng và dễ dàng tracking.
+```sql
+CREATE DATABASE tplite_db;
+```
 
-### 1. Cú pháp cơ bản
-`<type>: <mô tả ngắn gọn thay đổi (ưu tiên tiếng Anh hoặc tiếng Việt rõ nghĩa)>`
+Neu may da co schema cu bi lech kieu du lieu, nen tao database moi hoac drop schema cu truoc khi chay.
 
-### 2. Danh sách các `type` sử dụng
-* **`feat:`** Thêm một tính năng hoặc module mới.
-  * *Ví dụ:* `feat: implement money transfer API`
-* **`fix:`** Sửa một lỗi/bug.
-  * *Ví dụ:* `fix: resolve N+1 query issue in transaction history`
-* **`refactor:`** Tối ưu hóa, dọn dẹp hoặc cấu trúc lại code nhưng không làm thay đổi chức năng.
-  * *Ví dụ:* `refactor: extract validation logic to separate service`
-* **`docs:`** Cập nhật tài liệu (README, Swagger, JavaDoc).
-  * *Ví dụ:* `docs: update API documentation for authentication`
-* **`chore:`** Các công việc vặt, cấu hình hệ thống, cập nhật dependency (không đụng chạm tới source code chính).
-  * *Ví dụ:* `chore: add Spring Security and JWT dependencies`
-* **`test:`** Thêm mới hoặc sửa đổi các test case (Unit Test / Integration Test).
-  * *Ví dụ:* `test: add unit tests for TransferService`
+### 2. Cau hinh database
 
-### 3. Quy tắc bổ sung
-* Viết thường (lowercase) toàn bộ phần `<type>`.
-* Mô tả ngắn gọn, đi thẳng vào vấn đề (không quá 72 ký tự).
+Sua `core-banking/src/main/resources/application.yml` neu can:
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tplite_db
+    username: postgres
+    password: 123456
+```
+
+### 3. Chay Kafka neu muon test notification event
+
+```bash
+docker compose -f docker-compose.kafka.yml up -d
+```
+
+Neu Docker khong pull duoc image tu Docker Hub, day la loi DNS/proxy/network local, khong phai loi code.
+
+### 4. Chay test va app
+
+```bash
+cd core-banking
+mvn test
+mvn spring-boot:run
+```
+
+App mac dinh chay tai:
+
+```text
+http://localhost:8081
+```
+
+Swagger UI:
+
+```text
+http://localhost:8081/swagger-ui.html
+```
+
+## CI/CD
+
+Du an co GitHub Actions workflow tai `.github/workflows/ci.yml`.
+
+Workflow hien tai chay khi push hoac pull request vao `main`, `master`, `develop`:
+
+```text
+checkout source
+setup Java 17
+cache Maven dependencies
+mvn -B test
+```
+
+Day la CI co ban cho demo. Chua co buoc deploy production.
+
+## Seed Data
+
+Khi `app.seed.enabled=true`, app se tao data mau neu chua ton tai.
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | admin@tplite.vn | Password@123 |
+| Staff | staff@tplite.vn | Password@123 |
+| Customer | customer@tplite.vn | Password@123 |
+
+Seed data co them:
+
+- Role/permission co ban.
+- Customer mau da ACTIVE.
+- Account mau cho customer.
+- Loan product mau.
+
+## API Flow De Test Nhanh
+
+1. Login: `POST /api/auth/login`.
+2. Lay token trong response.
+3. Goi API bang header:
+
+```text
+Authorization: Bearer <access_token>
+```
+
+4. Thu cac flow:
+
+- Customer: profile, KYC, account, card, transfer, loan, notification.
+- Staff/admin: duyet KYC, duyet loan, xem audit log.
+- Admin: dashboard, quan ly user/status.
+
+Khi test transfer nen gui them header:
+
+```text
+Idempotency-Key: <uuid>
+```
+
+## Nhung Diem Hoc Duoc
+
+- Vi sao password phai hash, khong luu plain text.
+- Vi sao register/transfer/approve loan can `@Transactional`.
+- Cach Spring Security dua user vao `SecurityContext`.
+- Cach load role/permission tu DB bang `UserDetailsService`.
+- Cach phan trang voi `Pageable`, tranh API `getAll`.
+- Cach phan biet ledger balance, frozen amount va available balance.
+- Cach dung idempotency key de chong double submit giao dich.
+- Cach dung lock trong giao dich tien.
+- Cach ap dung Strategy Pattern trong bai toan lai vay.
+- Cach dung Kafka o muc event-driven co ban.
+
+## Han Che Cua Demo
+
+- Chua co OTP/2FA, captcha, rate limit production.
+- Chua co tich hop thanh toan, Napas, card issuer, credit bureau hay eKYC that.
+- Chua co ledger/reconciliation dung chuan ngan hang.
+- Chua co full schema Flyway cho tat ca bang; project van con dua vao JPA update cho mot phan schema.
+- Kafka moi o muc demo, chua co outbox pattern, retry/DLQ/idempotency day du.
+- CI/CD moi o muc build/test, chua co deploy.
+- Chua co Testcontainers va integration test voi PostgreSQL/Kafka that.
+- Chua co monitoring ELK/Prometheus/Grafana.
+
+## Huong Phat Trien
+
+- Viet Flyway migration day du cho toan bo schema.
+- Them Testcontainers cho PostgreSQL va Kafka.
+- Nang cap CI/CD: build Docker image, scan dependency, deploy staging.
+- Them Redis cho OTP, cache va rate limiting.
+- Nang cap Kafka theo outbox pattern, retry va DLQ.
+- Them monitoring voi ELK stack hoac Prometheus/Grafana.
+- Tach module theo microservice khi can hoc kien truc lon hon.
+
+## Commit Convention
+
+Du an uu tien Conventional Commits:
+
+```text
+feat: add card issuing API
+fix: prevent transfer to inactive account
+docs: update README limitations
+test: add loan interest strategy test
+chore: update kafka compose config
+```
