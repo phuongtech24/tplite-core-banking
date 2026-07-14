@@ -83,7 +83,7 @@ public class DataSeeder implements ApplicationRunner {
         seedCustomerAccounts(customerUser, customer);
         seedLoanProduct();
 
-        log.info("Seed data ready. Demo users: {}, {}, {} with password {}", admin.getEmail(), staff.getEmail(), customerUser.getEmail(), DEFAULT_PASSWORD);
+        log.info("Seed data ready. Demo users: {}, {}, {}", admin.getEmail(), staff.getEmail(), customerUser.getEmail());
     }
 
     private User seedUser(String email, String fullName, String roleName) {

@@ -54,7 +54,10 @@ springdoc:
     path: /v3/api-docs
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-no-request-id}] [%thread] %logger{36} - %msg%n"
   level:
+    com.tplite.core_banking: INFO
     org.springframework.orm.jpa: DEBUG
     org.springframework.transaction: DEBUG
 

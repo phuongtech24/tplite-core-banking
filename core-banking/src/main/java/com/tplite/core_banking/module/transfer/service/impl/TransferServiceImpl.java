@@ -63,6 +63,9 @@ public class TransferServiceImpl implements TransferService {
     public TransferDto transferMoney(String email, String idempotencyKey, TransferDto request) {
         User user = findUserByEmail(email);
         String normalizedKey = normalizeIdempotencyKey(idempotencyKey);
+        log.info("Transfer requested: userId={}, fromAccountId={}, toAccountId={}, amount={}, idempotencyKey={}",
+                user.getId(), request.getFromAccountId(), request.getToAccountId(), request.getAmount(), normalizedKey);
+
         if (normalizedKey != null) {
             Transaction existingTransaction = transactionRepository.findByIdempotencyKey(normalizedKey)
                     .orElse(null);
@@ -83,6 +86,8 @@ public class TransferServiceImpl implements TransferService {
         Account toAccount = lockedAccounts[0].getId().equals(request.getToAccountId()) ? lockedAccounts[0] : lockedAccounts[1];
 
         validateTransfer(user, fromAccount, toAccount, request);
+        log.info("Transfer validated: userId={}, fromAccountId={}, toAccountId={}, availableBalance={}, amount={}",
+                user.getId(), fromAccount.getId(), toAccount.getId(), fromAccount.getAvailableBalance(), request.getAmount());
 
         Transaction transaction = new Transaction(
                 fromAccount,
@@ -98,11 +103,18 @@ public class TransferServiceImpl implements TransferService {
         transaction.setCreatedBy(user);
 
         fromAccount.hold(request.getAmount());
+        log.info("Transfer hold completed: fromAccountId={}, frozenAmount={}, availableBalance={}, amount={}",
+                fromAccount.getId(), fromAccount.getFrozenAmount(), fromAccount.getAvailableBalance(), request.getAmount());
         Transaction pendingTransaction = transactionRepository.save(transaction);
+        log.info("Transfer transaction pending: transactionId={}, transactionCode={}, status={}",
+                pendingTransaction.getId(), pendingTransaction.getTransactionCode(), pendingTransaction.getStatus());
 
         fromAccount.clear(request.getAmount());
         toAccount.credit(request.getAmount());
         pendingTransaction.setStatus(TransactionStatus.SUCCESS);
+        log.info("Transfer clear completed: transactionId={}, fromAccountId={}, fromBalance={}, fromFrozenAmount={}, toAccountId={}, toBalance={}",
+                pendingTransaction.getId(), fromAccount.getId(), fromAccount.getBalance(), fromAccount.getFrozenAmount(),
+                toAccount.getId(), toAccount.getBalance());
 
         accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
