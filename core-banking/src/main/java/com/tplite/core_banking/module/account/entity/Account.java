@@ -52,6 +52,9 @@ public class Account {
     @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
 
+    @Column(name = "frozen_amount", nullable = false, precision = 19, scale = 2, columnDefinition = "numeric(19,2) default 0")
+    private BigDecimal frozenAmount = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private AccountStatus status = AccountStatus.ACTIVE;
@@ -130,11 +133,23 @@ public class Account {
     }
 
     public BigDecimal getBalance() {
-        return balance;
+        return balance == null ? BigDecimal.ZERO : balance;
     }
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public BigDecimal getFrozenAmount() {
+        return frozenAmount == null ? BigDecimal.ZERO : frozenAmount;
+    }
+
+    public void setFrozenAmount(BigDecimal frozenAmount) {
+        this.frozenAmount = frozenAmount;
+    }
+
+    public BigDecimal getAvailableBalance() {
+        return getBalance().subtract(getFrozenAmount());
     }
 
     public AccountStatus getStatus() {

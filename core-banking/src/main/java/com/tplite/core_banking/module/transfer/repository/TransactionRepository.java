@@ -1,5 +1,6 @@
 package com.tplite.core_banking.module.transfer.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ import com.tplite.core_banking.module.user.entity.User;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
     boolean existsByTransactionCode(String transactionCode);
+
+    Optional<Transaction> findByIdempotencyKey(String idempotencyKey);
 
     @Query("""
             SELECT t

@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,9 +33,10 @@ public class TransferController {
     @PreAuthorize("hasAuthority('TRANSFER_CREATE')")
     public ResponseEntity<ApiResponse<TransferDto>> transferMoney(
             Authentication authentication,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @Valid @RequestBody TransferDto request
     ) {
-        TransferDto response = transferService.transferMoney(authentication.getName(), request);
+        TransferDto response = transferService.transferMoney(authentication.getName(), idempotencyKey, request);
         return ResponseEntity.ok(ApiResponse.success("Transfer success", response));
     }
 

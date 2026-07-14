@@ -34,6 +34,9 @@ public class Transaction {
     @Column(name = "transaction_code", unique = true, length = 50)
     private String transactionCode;
 
+    @Column(name = "idempotency_key", unique = true, length = 80)
+    private String idempotencyKey;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_account_id")
     private Account fromAccount;
@@ -95,6 +98,14 @@ public class Transaction {
 
     public void setTransactionCode(String transactionCode) {
         this.transactionCode = transactionCode;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
     }
 
     public Account getFromAccount() {

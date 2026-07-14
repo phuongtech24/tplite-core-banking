@@ -1,5 +1,6 @@
 package com.tplite.core_banking.module.transfer.service.impl;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -55,7 +56,24 @@ public class TransferServiceImpl implements TransferService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TransferDto transferMoney(String email, TransferDto request) {
+        return transferMoney(email, null, request);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public TransferDto transferMoney(String email, String idempotencyKey, TransferDto request) {
         User user = findUserByEmail(email);
+        String normalizedKey = normalizeIdempotencyKey(idempotencyKey);
+        if (normalizedKey != null) {
+            Transaction existingTransaction = transactionRepository.findByIdempotencyKey(normalizedKey)
+                    .orElse(null);
+            if (existingTransaction != null) {
+                validateIdempotentReplay(user, existingTransaction, request);
+                log.info("Idempotent transfer replay: idempotencyKey={}, transactionId={}",
+                        normalizedKey, existingTransaction.getId());
+                return TransferDto.fromEntity(existingTransaction);
+            }
+        }
 
         if (request.getFromAccountId().equals(request.getToAccountId())) {
             throw new BusinessException("Source account and destination account must be different");
@@ -67,7 +85,8 @@ public class TransferServiceImpl implements TransferService {
 
         validateTransfer(user, fromAccount, toAccount, request);
 
-        fromAccount.setBalance(fromAccount.getBalance().subtract(request.getAmount()));
+        holdAmount(fromAccount, request.getAmount());
+        clearHeldDebit(fromAccount, request.getAmount());
         toAccount.setBalance(toAccount.getBalance().add(request.getAmount()));
 
         accountRepository.save(fromAccount);
@@ -81,6 +100,7 @@ public class TransferServiceImpl implements TransferService {
                 TransactionStatus.SUCCESS
         );
         transaction.setTransactionCode(generateUniqueTransactionCode());
+        transaction.setIdempotencyKey(normalizedKey);
         transaction.setCurrency(fromAccount.getCurrency());
         transaction.setDescription(request.getDescription());
         transaction.setCreatedBy(user);
@@ -126,8 +146,47 @@ public class TransferServiceImpl implements TransferService {
         if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
             throw new BusinessException("Currency mismatch");
         }
-        if (fromAccount.getBalance().compareTo(request.getAmount()) < 0) {
+        if (fromAccount.getAvailableBalance().compareTo(request.getAmount()) < 0) {
             throw new BusinessException("Insufficient balance");
+        }
+    }
+
+    private void holdAmount(Account account, BigDecimal amount) {
+        if (account.getAvailableBalance().compareTo(amount) < 0) {
+            throw new BusinessException("Insufficient available balance");
+        }
+        account.setFrozenAmount(account.getFrozenAmount().add(amount));
+    }
+
+    private void clearHeldDebit(Account account, BigDecimal amount) {
+        if (account.getFrozenAmount().compareTo(amount) < 0) {
+            throw new BusinessException("Frozen amount is not enough to clear");
+        }
+        account.setFrozenAmount(account.getFrozenAmount().subtract(amount));
+        account.setBalance(account.getBalance().subtract(amount));
+    }
+
+    private String normalizeIdempotencyKey(String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            return null;
+        }
+        String normalizedKey = idempotencyKey.trim();
+        try {
+            UUID.fromString(normalizedKey);
+        } catch (IllegalArgumentException exception) {
+            throw new BusinessException("Idempotency-Key must be a valid UUID");
+        }
+        return normalizedKey;
+    }
+
+    private void validateIdempotentReplay(User user, Transaction transaction, TransferDto request) {
+        if (!transaction.getCreatedBy().getId().equals(user.getId())) {
+            throw new BusinessException("Idempotency key belongs to another user");
+        }
+        if (!transaction.getFromAccount().getId().equals(request.getFromAccountId())
+                || !transaction.getToAccount().getId().equals(request.getToAccountId())
+                || transaction.getAmount().compareTo(request.getAmount()) != 0) {
+            throw new BusinessException("Idempotency key was already used for another transfer");
         }
     }
 

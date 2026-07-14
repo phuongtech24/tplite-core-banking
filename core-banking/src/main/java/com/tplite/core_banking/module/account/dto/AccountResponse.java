@@ -14,6 +14,8 @@ public class AccountResponse {
     private AccountType accountType;
     private String currency;
     private BigDecimal balance;
+    private BigDecimal frozenAmount;
+    private BigDecimal availableBalance;
     private AccountStatus status;
     private LocalDateTime openedAt;
     private LocalDateTime closedAt;
@@ -31,6 +33,8 @@ public class AccountResponse {
         response.setAccountType(account.getAccountType());
         response.setCurrency(account.getCurrency());
         response.setBalance(account.getBalance());
+        response.setFrozenAmount(account.getFrozenAmount());
+        response.setAvailableBalance(account.getAvailableBalance());
         response.setStatus(account.getStatus());
         response.setOpenedAt(account.getOpenedAt());
         response.setClosedAt(account.getClosedAt());
@@ -78,6 +82,22 @@ public class AccountResponse {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public BigDecimal getFrozenAmount() {
+        return frozenAmount;
+    }
+
+    public void setFrozenAmount(BigDecimal frozenAmount) {
+        this.frozenAmount = frozenAmount;
+    }
+
+    public BigDecimal getAvailableBalance() {
+        return availableBalance;
+    }
+
+    public void setAvailableBalance(BigDecimal availableBalance) {
+        this.availableBalance = availableBalance;
     }
 
     public AccountStatus getStatus() {

@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Size;
 public class TransferDto {
     private UUID transactionId;
     private String transactionCode;
+    private String idempotencyKey;
 
     @NotNull(message = "From account is required")
     private UUID fromAccountId;
@@ -45,6 +46,7 @@ public class TransferDto {
         TransferDto dto = new TransferDto();
         dto.setTransactionId(transaction.getId());
         dto.setTransactionCode(transaction.getTransactionCode());
+        dto.setIdempotencyKey(transaction.getIdempotencyKey());
         dto.setFromAccountId(transaction.getFromAccount().getId());
         dto.setToAccountId(transaction.getToAccount().getId());
         dto.setFromAccountNumber(transaction.getFromAccount().getAccountNumber());
@@ -72,6 +74,14 @@ public class TransferDto {
 
     public void setTransactionCode(String transactionCode) {
         this.transactionCode = transactionCode;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
     }
 
     public UUID getFromAccountId() {

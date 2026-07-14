@@ -16,6 +16,7 @@ Muc tieu chinh la nam chac Java Core, OOP, Spring Boot, Spring Security, JPA, da
 | ORM | Spring Data JPA, Hibernate |
 | Migration/seed | Flyway, application seed data |
 | Messaging | Apache Kafka, Spring Kafka |
+| API docs | Swagger/OpenAPI with springdoc |
 | Build/test | Maven, JUnit 5, Mockito |
 
 ## Tinh Nang Chinh
@@ -41,6 +42,7 @@ Muc tieu chinh la nam chac Java Core, OOP, Spring Boot, Spring Security, JPA, da
 - Tao tai khoan thanh toan cho customer.
 - Xem danh sach tai khoan cua minh.
 - Quan ly trang thai tai khoan.
+- Phan biet `balance`, `frozenAmount`, `availableBalance`.
 - Phat hanh the demo gan voi account.
 - Xem danh sach the cua minh, cap nhat trang thai the.
 
@@ -48,6 +50,8 @@ Muc tieu chinh la nam chac Java Core, OOP, Spring Boot, Spring Security, JPA, da
 
 - Chuyen tien giua hai tai khoan.
 - Kiem tra chu so huu, trang thai tai khoan, tien te va so du.
+- Check available balance theo cong thuc `balance - frozenAmount`.
+- Ho tro header `Idempotency-Key` de tranh duplicate transfer.
 - Dung `@Transactional` de dam bao ACID.
 - Dung pessimistic lock va thu tu lock theo UUID de giam nguy co deadlock.
 - Luu lich su giao dich co phan trang.
@@ -138,6 +142,12 @@ App mac dinh chay tai:
 http://localhost:8081
 ```
 
+Swagger UI:
+
+```text
+http://localhost:8081/swagger-ui.html
+```
+
 ## Seed Data
 
 Khi `app.seed.enabled=true`, app se tao data mau neu chua ton tai.
@@ -171,6 +181,12 @@ Authorization: Bearer <access_token>
 - Staff/admin: duyet KYC, duyet loan, xem audit log.
 - Admin: dashboard, quan ly user/status.
 
+Khi test transfer nen gui them header:
+
+```text
+Idempotency-Key: <uuid>
+```
+
 ## Nhung Diem Hoc Duoc
 
 - Vi sao password phai hash, khong luu plain text.
@@ -178,6 +194,8 @@ Authorization: Bearer <access_token>
 - Cach Spring Security dua user vao `SecurityContext`.
 - Cach load role/permission tu DB bang `UserDetailsService`.
 - Cach phan trang voi `Pageable`, tranh API `getAll`.
+- Cach phan biet ledger balance, frozen amount va available balance.
+- Cach dung idempotency key de chong double submit giao dich.
 - Cach dung lock trong giao dich tien.
 - Cach ap dung Strategy Pattern trong bai toan lai vay.
 - Cach dung Kafka o muc event-driven co ban.
@@ -189,7 +207,6 @@ Authorization: Bearer <access_token>
 - Chua co ledger/reconciliation dung chuan ngan hang.
 - Chua co full schema Flyway cho tat ca bang; project van con dua vao JPA update cho mot phan schema.
 - Kafka moi o muc demo, chua co outbox pattern, retry/DLQ/idempotency day du.
-- Chua co Swagger/OpenAPI.
 - Chua co CI/CD pipeline.
 - Chua co Testcontainers va integration test voi PostgreSQL/Kafka that.
 - Chua co monitoring ELK/Prometheus/Grafana.
@@ -197,7 +214,6 @@ Authorization: Bearer <access_token>
 ## Huong Phat Trien
 
 - Viet Flyway migration day du cho toan bo schema.
-- Them Swagger/OpenAPI de document API.
 - Them Testcontainers cho PostgreSQL va Kafka.
 - Them CI/CD voi GitHub Actions hoac Jenkins.
 - Them Redis cho OTP, cache va rate limiting.
