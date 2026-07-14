@@ -17,6 +17,7 @@ Muc tieu chinh la nam chac Java Core, OOP, Spring Boot, Spring Security, JPA, da
 | Migration/seed | Flyway, application seed data |
 | Messaging | Apache Kafka, Spring Kafka |
 | API docs | Swagger/OpenAPI with springdoc |
+| CI/CD | GitHub Actions CI |
 | Build/test | Maven, JUnit 5, Mockito |
 
 ## Tinh Nang Chinh
@@ -148,6 +149,21 @@ Swagger UI:
 http://localhost:8081/swagger-ui.html
 ```
 
+## CI/CD
+
+Du an co GitHub Actions workflow tai `.github/workflows/ci.yml`.
+
+Workflow hien tai chay khi push hoac pull request vao `main`, `master`, `develop`:
+
+```text
+checkout source
+setup Java 17
+cache Maven dependencies
+mvn -B test
+```
+
+Day la CI co ban cho demo. Chua co buoc deploy production.
+
 ## Seed Data
 
 Khi `app.seed.enabled=true`, app se tao data mau neu chua ton tai.
@@ -207,7 +223,7 @@ Idempotency-Key: <uuid>
 - Chua co ledger/reconciliation dung chuan ngan hang.
 - Chua co full schema Flyway cho tat ca bang; project van con dua vao JPA update cho mot phan schema.
 - Kafka moi o muc demo, chua co outbox pattern, retry/DLQ/idempotency day du.
-- Chua co CI/CD pipeline.
+- CI/CD moi o muc build/test, chua co deploy.
 - Chua co Testcontainers va integration test voi PostgreSQL/Kafka that.
 - Chua co monitoring ELK/Prometheus/Grafana.
 
@@ -215,7 +231,7 @@ Idempotency-Key: <uuid>
 
 - Viet Flyway migration day du cho toan bo schema.
 - Them Testcontainers cho PostgreSQL va Kafka.
-- Them CI/CD voi GitHub Actions hoac Jenkins.
+- Nang cap CI/CD: build Docker image, scan dependency, deploy staging.
 - Them Redis cho OTP, cache va rate limiting.
 - Nang cap Kafka theo outbox pattern, retry va DLQ.
 - Them monitoring voi ELK stack hoac Prometheus/Grafana.
