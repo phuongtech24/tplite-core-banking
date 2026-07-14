@@ -16,6 +16,8 @@ import com.tplite.core_banking.common.response.PageResponse;
 import com.tplite.core_banking.module.account.entity.Account;
 import com.tplite.core_banking.module.account.entity.AccountStatus;
 import com.tplite.core_banking.module.account.repository.AccountRepository;
+import com.tplite.core_banking.module.notification.entity.NotificationType;
+import com.tplite.core_banking.module.notification.event.NotificationEventPublisher;
 import com.tplite.core_banking.module.transfer.dto.TransferDto;
 import com.tplite.core_banking.module.transfer.entity.Transaction;
 import com.tplite.core_banking.module.transfer.entity.TransactionStatus;
@@ -32,15 +34,18 @@ public class TransferServiceImpl implements TransferService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     public TransferServiceImpl(
             AccountRepository accountRepository,
             TransactionRepository transactionRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            NotificationEventPublisher notificationEventPublisher
     ) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
+        this.notificationEventPublisher = notificationEventPublisher;
     }
 
     @Override
@@ -77,6 +82,7 @@ public class TransferServiceImpl implements TransferService {
         transaction.setCreatedBy(user);
 
         Transaction savedTransaction = transactionRepository.save(transaction);
+        createTransferNotifications(fromAccount, toAccount, savedTransaction);
         log.info("Transfer completed: transactionId={}, fromAccountId={}, toAccountId={}, amount={}",
                 savedTransaction.getId(), fromAccount.getId(), toAccount.getId(), savedTransaction.getAmount());
         return TransferDto.fromEntity(savedTransaction);
@@ -131,5 +137,23 @@ public class TransferServiceImpl implements TransferService {
             transactionCode = "TX" + System.currentTimeMillis() + ThreadLocalRandom.current().nextInt(1000, 9999);
         } while (transactionRepository.existsByTransactionCode(transactionCode));
         return transactionCode;
+    }
+
+    private void createTransferNotifications(Account fromAccount, Account toAccount, Transaction transaction) {
+        notificationEventPublisher.publishAfterCommit(
+                fromAccount.getUser(),
+                "Transfer completed",
+                "You transferred " + transaction.getAmount() + " " + transaction.getCurrency()
+                        + " to account " + toAccount.getAccountNumber(),
+                NotificationType.TRANSACTION
+        );
+
+        notificationEventPublisher.publishAfterCommit(
+                toAccount.getUser(),
+                "Money received",
+                "You received " + transaction.getAmount() + " " + transaction.getCurrency()
+                        + " from account " + fromAccount.getAccountNumber(),
+                NotificationType.TRANSACTION
+        );
     }
 }

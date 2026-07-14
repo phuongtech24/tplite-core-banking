@@ -31,6 +31,8 @@ import com.tplite.core_banking.module.loan.repository.LoanProductRepository;
 import com.tplite.core_banking.module.loan.repository.LoanRepository;
 import com.tplite.core_banking.module.loan.service.LoanService;
 import com.tplite.core_banking.module.loan.strategy.LoanInterestCalculator;
+import com.tplite.core_banking.module.notification.entity.NotificationType;
+import com.tplite.core_banking.module.notification.event.NotificationEventPublisher;
 import com.tplite.core_banking.module.user.entity.User;
 import com.tplite.core_banking.module.user.repository.UserRepository;
 
@@ -43,19 +45,22 @@ public class LoanServiceImpl implements LoanService {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
     private final LoanInterestCalculator interestCalculator;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     public LoanServiceImpl(
             LoanProductRepository loanProductRepository,
             LoanRepository loanRepository,
             CustomerRepository customerRepository,
             UserRepository userRepository,
-            LoanInterestCalculator interestCalculator
+            LoanInterestCalculator interestCalculator,
+            NotificationEventPublisher notificationEventPublisher
     ) {
         this.loanProductRepository = loanProductRepository;
         this.loanRepository = loanRepository;
         this.customerRepository = customerRepository;
         this.userRepository = userRepository;
         this.interestCalculator = interestCalculator;
+        this.notificationEventPublisher = notificationEventPublisher;
     }
 
     @Override
@@ -153,6 +158,12 @@ public class LoanServiceImpl implements LoanService {
         loan.setApprovedBy(approver);
         loan.setApprovedAt(LocalDateTime.now());
         Loan savedLoan = loanRepository.save(loan);
+        notificationEventPublisher.publishAfterCommit(
+                savedLoan.getCustomer().getUser(),
+                "Loan approved",
+                "Your loan application " + savedLoan.getLoanCode() + " has been approved",
+                NotificationType.LOAN
+        );
         log.info("Loan approved: loanId={}, approvedBy={}", savedLoan.getId(), approver.getId());
         return toResponse(savedLoan);
     }
@@ -170,6 +181,12 @@ public class LoanServiceImpl implements LoanService {
         loan.setApprovedBy(approver);
         loan.setApprovedAt(LocalDateTime.now());
         Loan savedLoan = loanRepository.save(loan);
+        notificationEventPublisher.publishAfterCommit(
+                savedLoan.getCustomer().getUser(),
+                "Loan rejected",
+                "Your loan application " + savedLoan.getLoanCode() + " has been rejected",
+                NotificationType.LOAN
+        );
         log.info("Loan rejected: loanId={}, rejectedBy={}", savedLoan.getId(), approver.getId());
         return toResponse(savedLoan);
     }
