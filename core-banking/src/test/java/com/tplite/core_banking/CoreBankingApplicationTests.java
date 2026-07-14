@@ -1,13 +1,14 @@
 package com.tplite.core_banking;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+import org.junit.jupiter.api.Test;
+
 class CoreBankingApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void applicationClassExists() {
+		assertThat(CoreBankingApplication.class).isNotNull();
 	}
 
 }

@@ -55,6 +55,8 @@ logging:
     org.springframework.transaction: DEBUG
 
 app:
+  seed:
+    enabled: true
   security:
     jwt:
       secret: dev-only-jwt-secret-key-change-me-please-32-bytes-minimum
