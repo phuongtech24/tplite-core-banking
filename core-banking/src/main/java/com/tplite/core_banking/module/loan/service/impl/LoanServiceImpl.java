@@ -16,6 +16,7 @@ import com.tplite.core_banking.common.exception.BusinessException;
 import com.tplite.core_banking.common.exception.DuplicateResourceException;
 import com.tplite.core_banking.common.exception.ResourceNotFoundException;
 import com.tplite.core_banking.common.response.PageResponse;
+import com.tplite.core_banking.module.audit.service.AuditLogService;
 import com.tplite.core_banking.module.customer.entity.Customer;
 import com.tplite.core_banking.module.customer.entity.CustomerStatus;
 import com.tplite.core_banking.module.customer.repository.CustomerRepository;
@@ -46,6 +47,7 @@ public class LoanServiceImpl implements LoanService {
     private final UserRepository userRepository;
     private final LoanInterestCalculator interestCalculator;
     private final NotificationEventPublisher notificationEventPublisher;
+    private final AuditLogService auditLogService;
 
     public LoanServiceImpl(
             LoanProductRepository loanProductRepository,
@@ -53,7 +55,8 @@ public class LoanServiceImpl implements LoanService {
             CustomerRepository customerRepository,
             UserRepository userRepository,
             LoanInterestCalculator interestCalculator,
-            NotificationEventPublisher notificationEventPublisher
+            NotificationEventPublisher notificationEventPublisher,
+            AuditLogService auditLogService
     ) {
         this.loanProductRepository = loanProductRepository;
         this.loanRepository = loanRepository;
@@ -61,6 +64,7 @@ public class LoanServiceImpl implements LoanService {
         this.userRepository = userRepository;
         this.interestCalculator = interestCalculator;
         this.notificationEventPublisher = notificationEventPublisher;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -123,6 +127,7 @@ public class LoanServiceImpl implements LoanService {
         loan.setStatus(LoanStatus.PENDING_REVIEW);
 
         Loan savedLoan = loanRepository.save(loan);
+        auditLogService.record(user, "LOAN_CREATE", "LOAN", savedLoan.getId(), "Loan application created");
         log.info("Loan application created: loanId={}, customerId={}", savedLoan.getId(), customer.getId());
         return toResponse(savedLoan);
     }
@@ -164,6 +169,7 @@ public class LoanServiceImpl implements LoanService {
                 "Your loan application " + savedLoan.getLoanCode() + " has been approved",
                 NotificationType.LOAN
         );
+        auditLogService.record(approver, "LOAN_APPROVE", "LOAN", savedLoan.getId(), "Loan approved");
         log.info("Loan approved: loanId={}, approvedBy={}", savedLoan.getId(), approver.getId());
         return toResponse(savedLoan);
     }
@@ -187,6 +193,7 @@ public class LoanServiceImpl implements LoanService {
                 "Your loan application " + savedLoan.getLoanCode() + " has been rejected",
                 NotificationType.LOAN
         );
+        auditLogService.record(approver, "LOAN_REJECT", "LOAN", savedLoan.getId(), "Loan rejected");
         log.info("Loan rejected: loanId={}, rejectedBy={}", savedLoan.getId(), approver.getId());
         return toResponse(savedLoan);
     }

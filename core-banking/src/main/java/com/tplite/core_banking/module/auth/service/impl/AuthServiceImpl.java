@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tplite.core_banking.common.exception.BusinessException;
 import com.tplite.core_banking.common.exception.DuplicateResourceException;
 import com.tplite.core_banking.common.exception.ResourceNotFoundException;
+import com.tplite.core_banking.module.audit.service.AuditLogService;
 import com.tplite.core_banking.module.auth.dto.AuthResponse;
 import com.tplite.core_banking.module.auth.dto.LoginRequest;
 import com.tplite.core_banking.module.auth.dto.RefreshTokenRequest;
@@ -48,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final AuditLogService auditLogService;
     private final int refreshTokenExpirationDays;
 
     public AuthServiceImpl(
@@ -59,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
             AuthenticationManager authenticationManager,
             UserDetailsService userDetailsService,
             JwtService jwtService,
+            AuditLogService auditLogService,
             @Value("${app.security.refresh-token.expiration-days}") int refreshTokenExpirationDays
     ) {
         this.userRepository = userRepository;
@@ -69,6 +72,7 @@ public class AuthServiceImpl implements AuthService {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
+        this.auditLogService = auditLogService;
         this.refreshTokenExpirationDays = refreshTokenExpirationDays;
     }
 
@@ -85,6 +89,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateToken(userDetails);
         String refreshToken = createRefreshToken(user);
 
+        auditLogService.record(user, "AUTH_LOGIN", "USER", user.getId(), "User logged in");
         log.info("User logged in successfully: {}", user.getEmail());
         return buildAuthResponse(user, getRoleNames(user), accessToken, refreshToken);
     }
@@ -115,6 +120,7 @@ public class AuthServiceImpl implements AuthService {
         refreshToken.setRevoked(true);
         refreshToken.setRevokedAt(LocalDateTime.now());
         refreshTokenRepository.save(refreshToken);
+        auditLogService.record(refreshToken.getUser(), "AUTH_LOGOUT", "REFRESH_TOKEN", refreshToken.getId(), "User logged out");
         log.info("Refresh token revoked for user id: {}", refreshToken.getUser().getId());
     }
 
@@ -140,6 +146,7 @@ public class AuthServiceImpl implements AuthService {
         userRole.setRole(customerRole);
         userRoleRepository.save(userRole);
 
+        auditLogService.record(savedUser, "AUTH_REGISTER", "USER", savedUser.getId(), "User registered");
         log.info("User registered successfully: {}", savedUser.getEmail());
         return new AuthResponse(
                 savedUser.getId(),

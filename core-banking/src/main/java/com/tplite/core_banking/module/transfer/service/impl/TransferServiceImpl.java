@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tplite.core_banking.common.exception.BusinessException;
 import com.tplite.core_banking.common.exception.ResourceNotFoundException;
 import com.tplite.core_banking.common.response.PageResponse;
+import com.tplite.core_banking.module.audit.service.AuditLogService;
 import com.tplite.core_banking.module.account.entity.Account;
 import com.tplite.core_banking.module.account.entity.AccountStatus;
 import com.tplite.core_banking.module.account.repository.AccountRepository;
@@ -35,17 +36,20 @@ public class TransferServiceImpl implements TransferService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final NotificationEventPublisher notificationEventPublisher;
+    private final AuditLogService auditLogService;
 
     public TransferServiceImpl(
             AccountRepository accountRepository,
             TransactionRepository transactionRepository,
             UserRepository userRepository,
-            NotificationEventPublisher notificationEventPublisher
+            NotificationEventPublisher notificationEventPublisher,
+            AuditLogService auditLogService
     ) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
         this.notificationEventPublisher = notificationEventPublisher;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -83,6 +87,7 @@ public class TransferServiceImpl implements TransferService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         createTransferNotifications(fromAccount, toAccount, savedTransaction);
+        auditLogService.record(user, "TRANSFER_CREATE", "TRANSACTION", savedTransaction.getId(), "Transfer completed");
         log.info("Transfer completed: transactionId={}, fromAccountId={}, toAccountId={}, amount={}",
                 savedTransaction.getId(), fromAccount.getId(), toAccount.getId(), savedTransaction.getAmount());
         return TransferDto.fromEntity(savedTransaction);
