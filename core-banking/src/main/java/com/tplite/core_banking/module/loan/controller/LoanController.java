@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tplite.core_banking.common.response.ApiResponse;
 import com.tplite.core_banking.common.response.PageResponse;
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.loan.dto.CreateLoanProductRequest;
 import com.tplite.core_banking.module.loan.dto.CreateLoanRequest;
 import com.tplite.core_banking.module.loan.dto.LoanProductResponse;
@@ -65,10 +67,10 @@ public class LoanController {
     @PreAuthorize("hasAuthority('LOAN_APPROVE')")
     public ResponseEntity<ApiResponse<PageResponse<LoanProductResponse>>> searchLoanProducts(
             @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) LoanProductStatus status,
+            @ValueOfEnum(enumClass = LoanProductStatus.class, message = "Loan product status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<LoanProductResponse> response = loanService.searchLoanProducts(keyword, status, pageable);
+        PageResponse<LoanProductResponse> response = loanService.searchLoanProducts(keyword, EnumParser.parse(LoanProductStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Search loan products success", response));
     }
 
@@ -96,10 +98,10 @@ public class LoanController {
     @PreAuthorize("hasAuthority('LOAN_REVIEW') or hasAuthority('LOAN_APPROVE')")
     public ResponseEntity<ApiResponse<PageResponse<LoanResponse>>> searchLoans(
             @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) LoanStatus status,
+            @ValueOfEnum(enumClass = LoanStatus.class, message = "Loan status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<LoanResponse> response = loanService.searchLoans(keyword, status, pageable);
+        PageResponse<LoanResponse> response = loanService.searchLoans(keyword, EnumParser.parse(LoanStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Search loans success", response));
     }
 

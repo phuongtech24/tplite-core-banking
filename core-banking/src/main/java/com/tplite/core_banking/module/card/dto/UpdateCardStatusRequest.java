@@ -1,18 +1,21 @@
 package com.tplite.core_banking.module.card.dto;
 
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.card.entity.CardStatus;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public class UpdateCardStatusRequest {
-    @NotNull(message = "Status is required")
-    private CardStatus status;
+    @NotBlank(message = "Status is required")
+    @ValueOfEnum(enumClass = CardStatus.class, message = "Status is invalid")
+    private String status;
 
     public CardStatus getStatus() {
-        return status;
+        return EnumParser.parse(CardStatus.class, status);
     }
 
-    public void setStatus(CardStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 }

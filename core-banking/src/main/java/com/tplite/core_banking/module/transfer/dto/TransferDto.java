@@ -1,24 +1,25 @@
 package com.tplite.core_banking.module.transfer.dto;
 
-import jakarta.validation.constraints.Pattern;
-
-import jakarta.validation.constraints.AssertTrue;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.transfer.entity.Transaction;
 import com.tplite.core_banking.module.transfer.entity.TransactionStatus;
 import com.tplite.core_banking.module.transfer.entity.TransactionType;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class TransferDto {
     private UUID transactionId;
     private String transactionCode;
+
     @Size(max = 100, message = "Idempotency key must not exceed 100 characters")
     private String idempotencyKey;
 
@@ -41,8 +42,12 @@ public class TransferDto {
     @Size(max = 255, message = "Description must not exceed 255 characters")
     private String description;
 
-    private TransactionType type;
-    private TransactionStatus status;
+    @ValueOfEnum(enumClass = TransactionType.class, message = "Transaction type is invalid")
+    private String type;
+
+    @ValueOfEnum(enumClass = TransactionStatus.class, message = "Transaction status is invalid")
+    private String status;
+
     private LocalDateTime createdAt;
 
     public TransferDto() {
@@ -89,6 +94,7 @@ public class TransferDto {
     public void setIdempotencyKey(String idempotencyKey) {
         this.idempotencyKey = idempotencyKey;
     }
+
     @AssertTrue(message = "From account and to account must be different")
     public boolean isDifferentAccounts() {
         return fromAccountId == null || toAccountId == null || !fromAccountId.equals(toAccountId);
@@ -151,19 +157,27 @@ public class TransferDto {
     }
 
     public TransactionType getType() {
-        return type;
+        return EnumParser.parse(TransactionType.class, type);
     }
 
-    public void setType(TransactionType type) {
+    public void setType(String type) {
         this.type = type;
     }
 
+    public void setType(TransactionType type) {
+        this.type = type == null ? null : type.name();
+    }
+
     public TransactionStatus getStatus() {
-        return status;
+        return EnumParser.parse(TransactionStatus.class, status);
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setStatus(TransactionStatus status) {
-        this.status = status;
+        this.status = status == null ? null : status.name();
     }
 
     public LocalDateTime getCreatedAt() {

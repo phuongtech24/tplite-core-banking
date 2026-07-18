@@ -8,6 +8,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tplite.core_banking.common.response.ApiResponse;
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.common.response.PageResponse;
 import com.tplite.core_banking.module.card.dto.CardResponse;
 import com.tplite.core_banking.module.card.dto.CreateCardRequest;
@@ -28,6 +31,7 @@ import com.tplite.core_banking.module.card.service.CardService;
 import jakarta.validation.Valid;
 
 @RestController
+@Validated
 @RequestMapping("/api/cards")
 public class CardController {
     private final CardService cardService;
@@ -50,10 +54,10 @@ public class CardController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<PageResponse<CardResponse>>> getMyCards(
             Authentication authentication,
-            @RequestParam(required = false) CardStatus status,
+            @ValueOfEnum(enumClass = CardStatus.class, message = "Status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<CardResponse> response = cardService.getMyCards(authentication.getName(), status, pageable);
+        PageResponse<CardResponse> response = cardService.getMyCards(authentication.getName(), EnumParser.parse(CardStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Get my cards success", response));
     }
 

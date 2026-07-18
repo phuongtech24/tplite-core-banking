@@ -2,6 +2,8 @@ package com.tplite.core_banking.module.customer.dto;
 
 import java.time.LocalDate;
 
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.customer.entity.Gender;
 
 import jakarta.validation.constraints.Email;
@@ -18,7 +20,8 @@ public class UpsertCustomerRequest {
     @Past(message = "Date of birth must be in the past")
     private LocalDate dateOfBirth;
 
-    private Gender gender;
+    @ValueOfEnum(enumClass = Gender.class, message = "Gender is invalid")
+    private String gender;
 
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     @Pattern(regexp = "^[0-9+]{9,15}$", message = "Phone is invalid")
@@ -48,10 +51,10 @@ public class UpsertCustomerRequest {
     }
 
     public Gender getGender() {
-        return gender;
+        return EnumParser.parse(Gender.class, gender);
     }
 
-    public void setGender(Gender gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 

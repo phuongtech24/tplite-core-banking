@@ -1,18 +1,20 @@
 package com.tplite.core_banking.module.account.dto;
 
-import jakarta.validation.constraints.NotBlank;
-
 import java.math.BigDecimal;
 
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.account.entity.AccountType;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class CreateAccountRequest {
-    @NotNull(message = "Account type is required")
-    private AccountType accountType;
+    @NotBlank(message = "Account type is required")
+    @ValueOfEnum(enumClass = AccountType.class, message = "Account type is invalid")
+    private String accountType;
 
     @NotBlank(message = "Currency is required")
     @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be 3 uppercase letters")
@@ -26,10 +28,10 @@ public class CreateAccountRequest {
     }
 
     public AccountType getAccountType() {
-        return accountType;
+        return EnumParser.parse(AccountType.class, accountType);
     }
 
-    public void setAccountType(AccountType accountType) {
+    public void setAccountType(String accountType) {
         this.accountType = accountType;
     }
 

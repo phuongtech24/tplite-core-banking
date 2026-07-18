@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tplite.core_banking.common.response.ApiResponse;
 import com.tplite.core_banking.common.response.PageResponse;
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.user.dto.UpdateMyProfileRequest;
 import com.tplite.core_banking.module.user.dto.UpdateUserStatusRequest;
 import com.tplite.core_banking.module.user.dto.UserResponse;
@@ -60,10 +62,10 @@ public class UserController {
     @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> searchUsers(
             @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) UserStatus status,
+            @ValueOfEnum(enumClass = UserStatus.class, message = "User status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<UserResponse> response = userService.searchUsers(keyword, status, pageable);
+        PageResponse<UserResponse> response = userService.searchUsers(keyword, EnumParser.parse(UserStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Search users success", response));
     }
 

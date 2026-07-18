@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tplite.core_banking.common.response.ApiResponse;
 import com.tplite.core_banking.common.response.PageResponse;
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.customer.dto.CreateKycDocumentRequest;
 import com.tplite.core_banking.module.customer.dto.CustomerResponse;
 import com.tplite.core_banking.module.customer.dto.KycDocumentResponse;
@@ -96,10 +98,10 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('CUSTOMER_READ')")
     public ResponseEntity<ApiResponse<PageResponse<CustomerResponse>>> searchCustomers(
             @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) CustomerStatus status,
+            @ValueOfEnum(enumClass = CustomerStatus.class, message = "Customer status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<CustomerResponse> response = customerService.searchCustomers(keyword, status, pageable);
+        PageResponse<CustomerResponse> response = customerService.searchCustomers(keyword, EnumParser.parse(CustomerStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Search customers success", response));
     }
 
@@ -107,10 +109,10 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('KYC_REVIEW')")
     public ResponseEntity<ApiResponse<PageResponse<KycDocumentResponse>>> searchKycDocuments(
             @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) KycDocumentStatus status,
+            @ValueOfEnum(enumClass = KycDocumentStatus.class, message = "KYC document status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<KycDocumentResponse> response = customerService.searchKycDocuments(keyword, status, pageable);
+        PageResponse<KycDocumentResponse> response = customerService.searchKycDocuments(keyword, EnumParser.parse(KycDocumentStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Search KYC documents success", response));
     }
 
