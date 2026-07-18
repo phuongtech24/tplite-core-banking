@@ -1,10 +1,16 @@
 package com.tplite.core_banking.module.audit.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.tplite.core_banking.module.audit.entity.AuditLog;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class AuditLogResponse {
     private UUID id;
     private UUID actorUserId;

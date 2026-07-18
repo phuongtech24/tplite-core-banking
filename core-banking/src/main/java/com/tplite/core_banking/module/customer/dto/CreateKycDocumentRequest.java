@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.customer.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDate;
 
 import com.tplite.core_banking.common.validation.EnumParser;
@@ -11,6 +14,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateKycDocumentRequest {
     @NotBlank(message = "Document type is required")
     @ValueOfEnum(enumClass = KycDocumentType.class, message = "Document type is invalid")

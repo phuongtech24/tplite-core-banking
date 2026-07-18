@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.loan.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -7,6 +10,9 @@ import java.util.UUID;
 import com.tplite.core_banking.module.loan.entity.Loan;
 import com.tplite.core_banking.module.loan.entity.LoanStatus;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class LoanResponse {
     private UUID id;
     private String loanCode;

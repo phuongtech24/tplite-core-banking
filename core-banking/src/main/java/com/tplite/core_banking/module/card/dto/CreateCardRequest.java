@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.card.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -11,6 +14,9 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateCardRequest {
     @NotNull(message = "Account id is required")
     private UUID accountId;
@@ -23,27 +29,7 @@ public class CreateCardRequest {
     @DecimalMin(value = "0.00", message = "Daily limit must be greater than or equal to 0")
     private BigDecimal dailyLimit = new BigDecimal("5000000.00");
 
-    public UUID getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(UUID accountId) {
-        this.accountId = accountId;
-    }
-
     public CardType getCardType() {
         return EnumParser.parse(CardType.class, cardType);
-    }
-
-    public void setCardType(String cardType) {
-        this.cardType = cardType;
-    }
-
-    public BigDecimal getDailyLimit() {
-        return dailyLimit;
-    }
-
-    public void setDailyLimit(BigDecimal dailyLimit) {
-        this.dailyLimit = dailyLimit;
     }
 }

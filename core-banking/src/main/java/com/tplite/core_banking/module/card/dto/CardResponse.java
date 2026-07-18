@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.card.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +12,9 @@ import com.tplite.core_banking.module.card.entity.Card;
 import com.tplite.core_banking.module.card.entity.CardStatus;
 import com.tplite.core_banking.module.card.entity.CardType;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CardResponse {
     private UUID id;
     private UUID accountId;

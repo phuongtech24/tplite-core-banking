@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.customer.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -8,6 +11,9 @@ import com.tplite.core_banking.module.customer.entity.Customer;
 import com.tplite.core_banking.module.customer.entity.CustomerStatus;
 import com.tplite.core_banking.module.customer.entity.Gender;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CustomerResponse {
     private UUID id;
     private String customerCode;

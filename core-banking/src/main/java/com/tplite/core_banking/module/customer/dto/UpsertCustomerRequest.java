@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.customer.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDate;
 
 import com.tplite.core_banking.common.validation.EnumParser;
@@ -12,6 +15,9 @@ import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class UpsertCustomerRequest {
     @NotBlank(message = "Full name is required")
     @Size(max = 255, message = "Full name must not exceed 255 characters")
@@ -31,46 +37,7 @@ public class UpsertCustomerRequest {
     @Size(max = 255, message = "Email must not exceed 255 characters")
     private String email;
 
-    public UpsertCustomerRequest() {
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
     public Gender getGender() {
         return EnumParser.parse(Gender.class, gender);
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 }

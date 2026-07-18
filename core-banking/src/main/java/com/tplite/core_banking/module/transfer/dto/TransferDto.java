@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.transfer.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,6 +19,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class TransferDto {
     private UUID transactionId;
     private String transactionCode;
@@ -50,9 +56,6 @@ public class TransferDto {
 
     private LocalDateTime createdAt;
 
-    public TransferDto() {
-    }
-
     public static TransferDto fromEntity(Transaction transaction) {
         TransferDto dto = new TransferDto();
         dto.setTransactionId(transaction.getId());
@@ -71,97 +74,13 @@ public class TransferDto {
         return dto;
     }
 
-    public UUID getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(UUID transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getTransactionCode() {
-        return transactionCode;
-    }
-
-    public void setTransactionCode(String transactionCode) {
-        this.transactionCode = transactionCode;
-    }
-
-    public String getIdempotencyKey() {
-        return idempotencyKey;
-    }
-
-    public void setIdempotencyKey(String idempotencyKey) {
-        this.idempotencyKey = idempotencyKey;
-    }
-
     @AssertTrue(message = "From account and to account must be different")
     public boolean isDifferentAccounts() {
         return fromAccountId == null || toAccountId == null || !fromAccountId.equals(toAccountId);
     }
 
-    public UUID getFromAccountId() {
-        return fromAccountId;
-    }
-
-    public void setFromAccountId(UUID fromAccountId) {
-        this.fromAccountId = fromAccountId;
-    }
-
-    public UUID getToAccountId() {
-        return toAccountId;
-    }
-
-    public void setToAccountId(UUID toAccountId) {
-        this.toAccountId = toAccountId;
-    }
-
-    public String getFromAccountNumber() {
-        return fromAccountNumber;
-    }
-
-    public void setFromAccountNumber(String fromAccountNumber) {
-        this.fromAccountNumber = fromAccountNumber;
-    }
-
-    public String getToAccountNumber() {
-        return toAccountNumber;
-    }
-
-    public void setToAccountNumber(String toAccountNumber) {
-        this.toAccountNumber = toAccountNumber;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public TransactionType getType() {
         return EnumParser.parse(TransactionType.class, type);
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public void setType(TransactionType type) {
@@ -172,19 +91,7 @@ public class TransferDto {
         return EnumParser.parse(TransactionStatus.class, status);
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public void setStatus(TransactionStatus status) {
         this.status = status == null ? null : status.name();
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

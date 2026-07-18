@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.loan.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import jakarta.validation.constraints.AssertTrue;
 
 import java.math.BigDecimal;
@@ -10,6 +13,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateLoanProductRequest {
     @NotBlank(message = "Code is required")
     @Size(max = 50, message = "Code must not exceed 50 characters")

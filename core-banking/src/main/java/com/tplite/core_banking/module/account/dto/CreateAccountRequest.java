@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.account.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 
 import com.tplite.core_banking.common.validation.EnumParser;
@@ -11,6 +14,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateAccountRequest {
     @NotBlank(message = "Account type is required")
     @ValueOfEnum(enumClass = AccountType.class, message = "Account type is invalid")
@@ -24,30 +30,7 @@ public class CreateAccountRequest {
     @DecimalMin(value = "0.00", message = "Initial balance must be greater than or equal to 0")
     private BigDecimal initialBalance = BigDecimal.ZERO;
 
-    public CreateAccountRequest() {
-    }
-
     public AccountType getAccountType() {
         return EnumParser.parse(AccountType.class, accountType);
-    }
-
-    public void setAccountType(String accountType) {
-        this.accountType = accountType;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public BigDecimal getInitialBalance() {
-        return initialBalance;
-    }
-
-    public void setInitialBalance(BigDecimal initialBalance) {
-        this.initialBalance = initialBalance;
     }
 }
