@@ -1,3 +1,7 @@
 # Local learning notes and agent rules
 AGENT.MD
 doc/*.md
+# Personal CV/interview notes
+TaskDaLam/*.md
+TaskDaLam/*.tex
+doc/cv-task-notes/*.md
