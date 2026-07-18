@@ -1,5 +1,11 @@
 package com.tplite.core_banking.module.transfer.controller;
 
+import jakarta.validation.constraints.Size;
+
+import jakarta.validation.constraints.Pattern;
+
+import org.springframework.validation.annotation.Validated;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -21,6 +27,7 @@ import com.tplite.core_banking.module.transfer.service.TransferService;
 import jakarta.validation.Valid;
 
 @RestController
+@Validated
 @RequestMapping("/api")
 public class TransferController {
     private final TransferService transferService;
@@ -33,7 +40,7 @@ public class TransferController {
     @PreAuthorize("hasAuthority('TRANSFER_CREATE')")
     public ResponseEntity<ApiResponse<TransferDto>> transferMoney(
             Authentication authentication,
-            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @Size(max = 100, message = "Idempotency key must not exceed 100 characters") @Pattern(regexp = "^(?!\\s*$).+", message = "Idempotency key must not be blank") @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @Valid @RequestBody TransferDto request
     ) {
         TransferDto response = transferService.transferMoney(authentication.getName(), idempotencyKey, request);

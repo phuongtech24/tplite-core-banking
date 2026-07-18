@@ -1,5 +1,7 @@
 package com.tplite.core_banking.module.customer.dto;
 
+import jakarta.validation.constraints.FutureOrPresent;
+
 import java.time.LocalDate;
 
 import com.tplite.core_banking.module.customer.entity.KycDocumentType;
@@ -20,6 +22,7 @@ public class CreateKycDocumentRequest {
     @PastOrPresent(message = "Issued date must not be in the future")
     private LocalDate issuedDate;
 
+    @FutureOrPresent(message = "Expired date must not be in the past")
     private LocalDate expiredDate;
 
     @Size(max = 255, message = "Issued by must not exceed 255 characters")

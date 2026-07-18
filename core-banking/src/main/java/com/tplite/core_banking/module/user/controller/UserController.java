@@ -1,5 +1,9 @@
 package com.tplite.core_banking.module.user.controller;
 
+import jakarta.validation.constraints.Size;
+
+import org.springframework.validation.annotation.Validated;
+
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -28,6 +32,7 @@ import com.tplite.core_banking.module.user.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
+@Validated
 @RequestMapping("/api")
 public class UserController {
     private final UserService userService;
@@ -54,7 +59,7 @@ public class UserController {
     @GetMapping("/admin/users")
     @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> searchUsers(
-            @RequestParam(required = false) String keyword,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
             @RequestParam(required = false) UserStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {

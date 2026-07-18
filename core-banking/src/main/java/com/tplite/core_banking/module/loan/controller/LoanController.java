@@ -1,5 +1,9 @@
 package com.tplite.core_banking.module.loan.controller;
 
+import jakarta.validation.constraints.Size;
+
+import org.springframework.validation.annotation.Validated;
+
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -30,6 +34,7 @@ import com.tplite.core_banking.module.loan.service.LoanService;
 import jakarta.validation.Valid;
 
 @RestController
+@Validated
 @RequestMapping("/api")
 public class LoanController {
     private final LoanService loanService;
@@ -49,7 +54,7 @@ public class LoanController {
 
     @GetMapping("/loan-products")
     public ResponseEntity<ApiResponse<PageResponse<LoanProductResponse>>> searchActiveLoanProducts(
-            @RequestParam(required = false) String keyword,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         PageResponse<LoanProductResponse> response = loanService.searchLoanProducts(keyword, LoanProductStatus.ACTIVE, pageable);
@@ -59,7 +64,7 @@ public class LoanController {
     @GetMapping("/admin/loan-products")
     @PreAuthorize("hasAuthority('LOAN_APPROVE')")
     public ResponseEntity<ApiResponse<PageResponse<LoanProductResponse>>> searchLoanProducts(
-            @RequestParam(required = false) String keyword,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
             @RequestParam(required = false) LoanProductStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -90,7 +95,7 @@ public class LoanController {
     @GetMapping("/staff/loans")
     @PreAuthorize("hasAuthority('LOAN_REVIEW') or hasAuthority('LOAN_APPROVE')")
     public ResponseEntity<ApiResponse<PageResponse<LoanResponse>>> searchLoans(
-            @RequestParam(required = false) String keyword,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
             @RequestParam(required = false) LoanStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {

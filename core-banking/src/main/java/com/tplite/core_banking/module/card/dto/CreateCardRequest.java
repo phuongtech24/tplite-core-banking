@@ -15,6 +15,7 @@ public class CreateCardRequest {
     @NotNull(message = "Card type is required")
     private CardType cardType;
 
+    @NotNull(message = "Daily limit is required")
     @DecimalMin(value = "0.00", message = "Daily limit must be greater than or equal to 0")
     private BigDecimal dailyLimit = new BigDecimal("5000000.00");
 

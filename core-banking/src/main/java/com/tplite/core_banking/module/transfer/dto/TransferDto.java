@@ -1,5 +1,9 @@
 package com.tplite.core_banking.module.transfer.dto;
 
+import jakarta.validation.constraints.Pattern;
+
+import jakarta.validation.constraints.AssertTrue;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +19,7 @@ import jakarta.validation.constraints.Size;
 public class TransferDto {
     private UUID transactionId;
     private String transactionCode;
+    @Size(max = 100, message = "Idempotency key must not exceed 100 characters")
     private String idempotencyKey;
 
     @NotNull(message = "From account is required")
@@ -30,6 +35,7 @@ public class TransferDto {
     @DecimalMin(value = "1.00", message = "Amount must be greater than or equal to 1")
     private BigDecimal amount;
 
+    @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be 3 uppercase letters")
     private String currency;
 
     @Size(max = 255, message = "Description must not exceed 255 characters")
@@ -82,6 +88,10 @@ public class TransferDto {
 
     public void setIdempotencyKey(String idempotencyKey) {
         this.idempotencyKey = idempotencyKey;
+    }
+    @AssertTrue(message = "From account and to account must be different")
+    public boolean isDifferentAccounts() {
+        return fromAccountId == null || toAccountId == null || !fromAccountId.equals(toAccountId);
     }
 
     public UUID getFromAccountId() {

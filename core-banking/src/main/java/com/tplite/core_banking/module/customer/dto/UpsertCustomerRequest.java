@@ -20,10 +20,12 @@ public class UpsertCustomerRequest {
 
     private Gender gender;
 
+    @Size(max = 20, message = "Phone must not exceed 20 characters")
     @Pattern(regexp = "^[0-9+]{9,15}$", message = "Phone is invalid")
     private String phone;
 
     @Email(message = "Email is invalid")
+    @Size(max = 255, message = "Email must not exceed 255 characters")
     private String email;
 
     public UpsertCustomerRequest() {

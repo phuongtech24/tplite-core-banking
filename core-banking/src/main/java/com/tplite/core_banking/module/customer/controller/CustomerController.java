@@ -1,5 +1,9 @@
 package com.tplite.core_banking.module.customer.controller;
 
+import jakarta.validation.constraints.Size;
+
+import org.springframework.validation.annotation.Validated;
+
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -32,6 +36,7 @@ import com.tplite.core_banking.module.customer.service.CustomerService;
 import jakarta.validation.Valid;
 
 @RestController
+@Validated
 @RequestMapping("/api")
 public class CustomerController {
     private final CustomerService customerService;
@@ -90,7 +95,7 @@ public class CustomerController {
     @GetMapping("/staff/customers")
     @PreAuthorize("hasAuthority('CUSTOMER_READ')")
     public ResponseEntity<ApiResponse<PageResponse<CustomerResponse>>> searchCustomers(
-            @RequestParam(required = false) String keyword,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
             @RequestParam(required = false) CustomerStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -101,7 +106,7 @@ public class CustomerController {
     @GetMapping("/staff/kyc-documents")
     @PreAuthorize("hasAuthority('KYC_REVIEW')")
     public ResponseEntity<ApiResponse<PageResponse<KycDocumentResponse>>> searchKycDocuments(
-            @RequestParam(required = false) String keyword,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
             @RequestParam(required = false) KycDocumentStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
