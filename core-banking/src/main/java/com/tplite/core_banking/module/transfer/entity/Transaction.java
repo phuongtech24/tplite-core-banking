@@ -1,10 +1,7 @@
 package com.tplite.core_banking.module.transfer.entity;
 
+import com.tplite.core_banking.common.entity.BaseEntity;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import com.tplite.core_banking.module.account.entity.Account;
 import com.tplite.core_banking.module.user.entity.User;
@@ -14,23 +11,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "transactions")
-public class Transaction {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
+public class Transaction extends BaseEntity {
     @Column(name = "transaction_code", unique = true, length = 50)
     private String transactionCode;
 
@@ -65,15 +52,6 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     public Transaction() {}
 
     public Transaction(Account fromAccount, Account toAccount, BigDecimal amount, TransactionType type, TransactionStatus status) {
@@ -83,15 +61,6 @@ public class Transaction {
         this.type = type;
         this.status = status;
     }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public String getTransactionCode() {
         return transactionCode;
     }
@@ -170,21 +139,5 @@ public class Transaction {
 
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

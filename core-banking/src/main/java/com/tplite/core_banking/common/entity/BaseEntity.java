@@ -1,28 +1,42 @@
 package com.tplite.core_banking.common.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
+
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted", nullable = false)
-    private boolean deleted = false;
+    @Column(name = "voided", nullable = false)
+    private boolean voided = false;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -40,24 +54,19 @@ public abstract class BaseEntity {
         this.updatedAt = updatedAt;
     }
 
-    public boolean isDeleted() {
-        return deleted;
+    public boolean isVoided() {
+        return voided;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public void setVoided(boolean voided) {
+        this.voided = voided;
     }
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public void markVoided() {
+        this.voided = true;
     }
 
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-
-    public void markDeleted() {
-        this.deleted = true;
-        this.deletedAt = LocalDateTime.now();
+    public void restore() {
+        this.voided = false;
     }
 }

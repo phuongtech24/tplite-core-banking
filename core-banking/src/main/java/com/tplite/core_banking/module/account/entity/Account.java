@@ -1,10 +1,8 @@
 package com.tplite.core_banking.module.account.entity;
 
+import com.tplite.core_banking.common.entity.BaseEntity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import com.tplite.core_banking.module.customer.entity.Customer;
 import com.tplite.core_banking.module.user.entity.User;
@@ -14,23 +12,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "accounts")
-public class Account {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
+public class Account extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -68,30 +57,12 @@ public class Account {
     @Version
     @Column(name = "version")
     private Long version;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     public Account() {}
 
     public Account(User user, BigDecimal balance) {
         this.user = user;
         this.balance = balance;
     }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public User getUser() {
         return user;
     }
@@ -218,21 +189,5 @@ public class Account {
 
     public void setVersion(Long version) {
         this.version = version;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }
