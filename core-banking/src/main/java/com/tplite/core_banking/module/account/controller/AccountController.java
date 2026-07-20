@@ -32,7 +32,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @Validated
-@RequestMapping("/api/accounts")
+@RequestMapping("/api/v1/accounts")
 public class AccountController {
     private final AccountService accountService;
 

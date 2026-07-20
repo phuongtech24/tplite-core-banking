@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tplite.core_banking.common.response.ApiResponse;
 
 @RestController
-@RequestMapping("/api/security-test")
+@RequestMapping("/api/v1/security-test")
 public class SecurityTestController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<String>> me(Authentication authentication) {

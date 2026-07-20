@@ -21,7 +21,7 @@ import com.tplite.core_banking.module.audit.service.AuditLogService;
 
 @RestController
 @Validated
-@RequestMapping("/api/admin/audit-logs")
+@RequestMapping("/api/v1/admin/audit-logs")
 public class AuditLogController {
     private final AuditLogService auditLogService;
 

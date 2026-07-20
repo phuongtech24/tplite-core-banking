@@ -28,7 +28,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @Validated
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class TransferController {
     private final TransferService transferService;
 

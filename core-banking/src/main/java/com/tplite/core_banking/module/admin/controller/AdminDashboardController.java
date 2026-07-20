@@ -11,7 +11,7 @@ import com.tplite.core_banking.module.admin.dto.AdminDashboardResponse;
 import com.tplite.core_banking.module.admin.service.AdminDashboardService;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/v1/admin")
 public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
 

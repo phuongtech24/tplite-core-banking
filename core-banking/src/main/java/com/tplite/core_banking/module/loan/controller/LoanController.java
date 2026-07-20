@@ -37,7 +37,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @Validated
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class LoanController {
     private final LoanService loanService;
 

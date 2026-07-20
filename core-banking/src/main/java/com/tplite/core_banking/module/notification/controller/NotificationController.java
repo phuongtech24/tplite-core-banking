@@ -25,7 +25,7 @@ import com.tplite.core_banking.module.notification.service.NotificationService;
 
 @RestController
 @Validated
-@RequestMapping("/api/notifications")
+@RequestMapping("/api/v1/notifications")
 public class NotificationController {
     private final NotificationService notificationService;
 
