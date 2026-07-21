@@ -5,3 +5,9 @@ doc/*.md
 TaskDaLam/*.md
 TaskDaLam/*.tex
 doc/cv-task-notes/*.md
+
+# Local API/performance test artifacts
+TaskDaLam/postman-core-banking/
+perf-results/
+scripts/perf-*.mjs
+cv-performance-test-guide.md
