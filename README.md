@@ -135,6 +135,13 @@ mvn test
 mvn spring-boot:run
 ```
 
+Neu muon chay integration test voi PostgreSQL/Kafka that bang Testcontainers, can bat Docker Desktop truoc:
+
+```bash
+cd core-banking
+mvn verify
+```
+
 App mac dinh chay tai:
 
 ```text
@@ -213,8 +220,7 @@ Idempotency-Key: <uuid>
 - Cach dung lock trong giao dich tien.
 - Cach ap dung Strategy Pattern trong bai toan lai vay.
 - Cach dung Kafka o muc event-driven co ban.
-
-
+- Cach dung Testcontainers de chay integration test voi PostgreSQL va Kafka that.
 
 ## Commit Convention
 
