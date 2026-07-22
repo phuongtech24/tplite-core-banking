@@ -111,14 +111,13 @@ Neu may da co schema cu bi lech kieu du lieu, nen tao database moi hoac drop sch
 
 ### 2. Cau hinh database
 
-Sua `core-banking/src/main/resources/application.yml` neu can:
+Dung bien moi truong hoac tao file local `.env` tu `core-banking/.env.example`:
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/tplite_db
-    username: postgres
-    password: 123456
+```env
+DB_URL=jdbc:postgresql://localhost:5432/tplite_core_banking_dev
+DB_USERNAME=postgres
+DB_PASSWORD=your_local_password
+JWT_SECRET=change_me_to_at_least_32_bytes_secret_key
 ```
 
 ### 3. Chay Kafka neu muon test notification event

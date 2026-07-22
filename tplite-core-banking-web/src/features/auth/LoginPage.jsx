@@ -7,7 +7,7 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { status, error } = useSelector((state) => state.auth);
-  const [form, setForm] = useState({ email: 'admin@tplite.com', password: 'Admin@123' });
+  const [form, setForm] = useState({ email: '', password: '' });
 
   const handleChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
 
