@@ -2,6 +2,7 @@ package com.tplite.core_banking.module.notification.entity;
 
 import com.tplite.core_banking.common.entity.BaseEntity;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.tplite.core_banking.module.user.entity.User;
 
@@ -23,6 +24,9 @@ import lombok.Setter;
 @Entity
 @Table(name = "notifications")
 public class Notification extends BaseEntity {
+    @Column(name = "event_id", unique = true)
+    private UUID eventId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

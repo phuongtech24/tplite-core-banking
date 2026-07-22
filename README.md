@@ -94,7 +94,6 @@ Bank_Core/
 |   |   |-- db/migration/
 |   |-- src/test/java/
 |-- infra/docker/docker-compose.kafka.yml
-|-- CLAUDE.md
 ```
 
 ## Chay Local
@@ -215,26 +214,7 @@ Idempotency-Key: <uuid>
 - Cach ap dung Strategy Pattern trong bai toan lai vay.
 - Cach dung Kafka o muc event-driven co ban.
 
-## Han Che Cua Demo
 
-- Chua co OTP/2FA, captcha, rate limit production.
-- Chua co tich hop thanh toan, Napas, card issuer, credit bureau hay eKYC that.
-- Chua co ledger/reconciliation dung chuan ngan hang.
-- Chua co full schema Flyway cho tat ca bang; project van con dua vao JPA update cho mot phan schema.
-- Kafka moi o muc demo, chua co outbox pattern, retry/DLQ/idempotency day du.
-- CI/CD moi o muc build/test, chua co deploy.
-- Chua co Testcontainers va integration test voi PostgreSQL/Kafka that.
-- Chua co monitoring ELK/Prometheus/Grafana.
-
-## Huong Phat Trien
-
-- Viet Flyway migration day du cho toan bo schema.
-- Them Testcontainers cho PostgreSQL va Kafka.
-- Nang cap CI/CD: build Docker image, scan dependency, deploy staging.
-- Them Redis cho OTP, cache va rate limiting.
-- Nang cap Kafka theo outbox pattern, retry va DLQ.
-- Them monitoring voi ELK stack hoac Prometheus/Grafana.
-- Tach module theo microservice khi can hoc kien truc lon hon.
 
 ## Commit Convention
 

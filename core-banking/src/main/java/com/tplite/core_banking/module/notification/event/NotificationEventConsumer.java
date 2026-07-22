@@ -26,7 +26,8 @@ public class NotificationEventConsumer {
         User user = userRepository.findById(event.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("Notification user not found: " + event.getUserId()));
 
-        notificationService.createInAppNotification(
+        notificationService.createInAppNotificationFromEvent(
+                event.getEventId(),
                 user,
                 event.getTitle(),
                 event.getContent(),

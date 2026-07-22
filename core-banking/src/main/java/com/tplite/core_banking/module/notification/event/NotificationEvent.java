@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.tplite.core_banking.module.notification.entity.NotificationType;
 
 public class NotificationEvent {
+    private UUID eventId;
     private UUID userId;
     private String title;
     private String content;
@@ -13,11 +14,20 @@ public class NotificationEvent {
     public NotificationEvent() {
     }
 
-    public NotificationEvent(UUID userId, String title, String content, NotificationType notificationType) {
+    public NotificationEvent(UUID eventId, UUID userId, String title, String content, NotificationType notificationType) {
+        this.eventId = eventId;
         this.userId = userId;
         this.title = title;
         this.content = content;
         this.notificationType = notificationType;
+    }
+
+    public UUID getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(UUID eventId) {
+        this.eventId = eventId;
     }
 
     public UUID getUserId() {

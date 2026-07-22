@@ -19,4 +19,6 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     Page<Notification> findByUserAndStatus(User user, NotificationStatus status, Pageable pageable);
 
     Optional<Notification> findByIdAndUser(UUID id, User user);
+
+    boolean existsByEventId(UUID eventId);
 }

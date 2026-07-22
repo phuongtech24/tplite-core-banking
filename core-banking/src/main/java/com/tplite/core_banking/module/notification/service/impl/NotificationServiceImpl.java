@@ -37,7 +37,22 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public NotificationResponse createInAppNotification(User user, String title, String content, NotificationType type) {
+        return createNotification(null, user, title, content, type);
+    }
+
+    @Override
+    @Transactional
+    public NotificationResponse createInAppNotificationFromEvent(UUID eventId, User user, String title, String content, NotificationType type) {
+        if (eventId != null && notificationRepository.existsByEventId(eventId)) {
+            log.info("Duplicate notification event ignored: eventId={}, userId={}, type={}", eventId, user.getId(), type);
+            return null;
+        }
+        return createNotification(eventId, user, title, content, type);
+    }
+
+    private NotificationResponse createNotification(UUID eventId, User user, String title, String content, NotificationType type) {
         Notification notification = new Notification();
+        notification.setEventId(eventId);
         notification.setUser(user);
         notification.setTitle(title);
         notification.setContent(content);
