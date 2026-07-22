@@ -93,8 +93,7 @@ Bank_Core/
 |   |   |-- application.yml
 |   |   |-- db/migration/
 |   |-- src/test/java/
-|-- docker-compose.kafka.yml
-|-- CLAUDE.md
+|-- infra/docker/docker-compose.kafka.yml
 ```
 
 ## Chay Local
@@ -111,20 +110,19 @@ Neu may da co schema cu bi lech kieu du lieu, nen tao database moi hoac drop sch
 
 ### 2. Cau hinh database
 
-Sua `core-banking/src/main/resources/application.yml` neu can:
+Dung bien moi truong hoac tao file local `.env` tu `core-banking/.env.example`:
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/tplite_db
-    username: postgres
-    password: 123456
+```env
+DB_URL=jdbc:postgresql://localhost:5432/tplite_core_banking_dev
+DB_USERNAME=postgres
+DB_PASSWORD=your_local_password
+JWT_SECRET=change_me_to_at_least_32_bytes_secret_key
 ```
 
 ### 3. Chay Kafka neu muon test notification event
 
 ```bash
-docker compose -f docker-compose.kafka.yml up -d
+docker compose -f infra/docker/docker-compose.kafka.yml up -d
 ```
 
 Neu Docker khong pull duoc image tu Docker Hub, day la loi DNS/proxy/network local, khong phai loi code.
@@ -135,6 +133,13 @@ Neu Docker khong pull duoc image tu Docker Hub, day la loi DNS/proxy/network loc
 cd core-banking
 mvn test
 mvn spring-boot:run
+```
+
+Neu muon chay integration test voi PostgreSQL/Kafka that bang Testcontainers, can bat Docker Desktop truoc:
+
+```bash
+cd core-banking
+mvn verify
 ```
 
 App mac dinh chay tai:
@@ -215,27 +220,7 @@ Idempotency-Key: <uuid>
 - Cach dung lock trong giao dich tien.
 - Cach ap dung Strategy Pattern trong bai toan lai vay.
 - Cach dung Kafka o muc event-driven co ban.
-
-## Han Che Cua Demo
-
-- Chua co OTP/2FA, captcha, rate limit production.
-- Chua co tich hop thanh toan, Napas, card issuer, credit bureau hay eKYC that.
-- Chua co ledger/reconciliation dung chuan ngan hang.
-- Chua co full schema Flyway cho tat ca bang; project van con dua vao JPA update cho mot phan schema.
-- Kafka moi o muc demo, chua co outbox pattern, retry/DLQ/idempotency day du.
-- CI/CD moi o muc build/test, chua co deploy.
-- Chua co Testcontainers va integration test voi PostgreSQL/Kafka that.
-- Chua co monitoring ELK/Prometheus/Grafana.
-
-## Huong Phat Trien
-
-- Viet Flyway migration day du cho toan bo schema.
-- Them Testcontainers cho PostgreSQL va Kafka.
-- Nang cap CI/CD: build Docker image, scan dependency, deploy staging.
-- Them Redis cho OTP, cache va rate limiting.
-- Nang cap Kafka theo outbox pattern, retry va DLQ.
-- Them monitoring voi ELK stack hoac Prometheus/Grafana.
-- Tach module theo microservice khi can hoc kien truc lon hon.
+- Cach dung Testcontainers de chay integration test voi PostgreSQL va Kafka that.
 
 ## Commit Convention
 

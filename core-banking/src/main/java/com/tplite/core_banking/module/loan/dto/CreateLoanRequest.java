@@ -1,5 +1,8 @@
 package com.tplite.core_banking.module.loan.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -7,6 +10,9 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateLoanRequest {
     @NotNull(message = "Loan product id is required")
     private UUID loanProductId;

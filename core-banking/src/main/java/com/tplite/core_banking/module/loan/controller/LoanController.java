@@ -1,5 +1,9 @@
 package com.tplite.core_banking.module.loan.controller;
 
+import jakarta.validation.constraints.Size;
+
+import org.springframework.validation.annotation.Validated;
+
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tplite.core_banking.common.response.ApiResponse;
 import com.tplite.core_banking.common.response.PageResponse;
+import com.tplite.core_banking.common.validation.EnumParser;
+import com.tplite.core_banking.common.validation.ValueOfEnum;
 import com.tplite.core_banking.module.loan.dto.CreateLoanProductRequest;
 import com.tplite.core_banking.module.loan.dto.CreateLoanRequest;
 import com.tplite.core_banking.module.loan.dto.LoanProductResponse;
@@ -30,7 +36,8 @@ import com.tplite.core_banking.module.loan.service.LoanService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@Validated
+@RequestMapping("/api/v1")
 public class LoanController {
     private final LoanService loanService;
 
@@ -49,7 +56,7 @@ public class LoanController {
 
     @GetMapping("/loan-products")
     public ResponseEntity<ApiResponse<PageResponse<LoanProductResponse>>> searchActiveLoanProducts(
-            @RequestParam(required = false) String keyword,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         PageResponse<LoanProductResponse> response = loanService.searchLoanProducts(keyword, LoanProductStatus.ACTIVE, pageable);
@@ -59,11 +66,11 @@ public class LoanController {
     @GetMapping("/admin/loan-products")
     @PreAuthorize("hasAuthority('LOAN_APPROVE')")
     public ResponseEntity<ApiResponse<PageResponse<LoanProductResponse>>> searchLoanProducts(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) LoanProductStatus status,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
+            @ValueOfEnum(enumClass = LoanProductStatus.class, message = "Loan product status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<LoanProductResponse> response = loanService.searchLoanProducts(keyword, status, pageable);
+        PageResponse<LoanProductResponse> response = loanService.searchLoanProducts(keyword, EnumParser.parse(LoanProductStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Search loan products success", response));
     }
 
@@ -90,11 +97,11 @@ public class LoanController {
     @GetMapping("/staff/loans")
     @PreAuthorize("hasAuthority('LOAN_REVIEW') or hasAuthority('LOAN_APPROVE')")
     public ResponseEntity<ApiResponse<PageResponse<LoanResponse>>> searchLoans(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) LoanStatus status,
+            @Size(max = 100, message = "Keyword must not exceed 100 characters") @RequestParam(required = false) String keyword,
+            @ValueOfEnum(enumClass = LoanStatus.class, message = "Loan status is invalid") @RequestParam(required = false) String status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        PageResponse<LoanResponse> response = loanService.searchLoans(keyword, status, pageable);
+        PageResponse<LoanResponse> response = loanService.searchLoans(keyword, EnumParser.parse(LoanStatus.class, status), pageable);
         return ResponseEntity.ok(ApiResponse.success("Search loans success", response));
     }
 

@@ -13,6 +13,8 @@ import com.tplite.core_banking.module.user.entity.User;
 public interface NotificationService {
     NotificationResponse createInAppNotification(User user, String title, String content, NotificationType type);
 
+    NotificationResponse createInAppNotificationFromEvent(UUID eventId, User user, String title, String content, NotificationType type);
+
     PageResponse<NotificationResponse> getMyNotifications(String email, NotificationStatus status, Pageable pageable);
 
     NotificationResponse markAsRead(String email, UUID notificationId);

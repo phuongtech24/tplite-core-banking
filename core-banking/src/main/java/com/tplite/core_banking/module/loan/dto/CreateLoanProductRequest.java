@@ -1,5 +1,10 @@
 package com.tplite.core_banking.module.loan.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import jakarta.validation.constraints.AssertTrue;
+
 import java.math.BigDecimal;
 
 import jakarta.validation.constraints.DecimalMin;
@@ -8,6 +13,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CreateLoanProductRequest {
     @NotBlank(message = "Code is required")
     @Size(max = 50, message = "Code must not exceed 50 characters")
@@ -36,6 +44,15 @@ public class CreateLoanProductRequest {
     @NotNull(message = "Max term months is required")
     @Min(value = 1, message = "Max term months must be at least 1")
     private Integer maxTermMonths;
+    @AssertTrue(message = "Max amount must be greater than or equal to min amount")
+    public boolean isAmountRangeValid() {
+        return minAmount == null || maxAmount == null || maxAmount.compareTo(minAmount) >= 0;
+    }
+
+    @AssertTrue(message = "Max term months must be greater than or equal to min term months")
+    public boolean isTermRangeValid() {
+        return minTermMonths == null || maxTermMonths == null || maxTermMonths >= minTermMonths;
+    }
 
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }

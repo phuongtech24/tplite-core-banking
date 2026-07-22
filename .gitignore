@@ -1,3 +1,22 @@
 # Local learning notes and agent rules
 AGENT.MD
 doc/*.md
+# Personal CV/interview notes
+TaskDaLam/*.md
+TaskDaLam/*.tex
+doc/cv-task-notes/*.md
+
+# Local API/performance test artifacts
+TaskDaLam/postman-core-banking/
+perf-results/
+scripts/perf-*.mjs
+cv-performance-test-guide.md
+
+# Local environment secrets
+.env
+.env.*
+!.env.example
+core-banking/.env
+core-banking/.env.*
+!core-banking/.env.example
+CLAUDE.md

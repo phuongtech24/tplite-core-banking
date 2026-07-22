@@ -1,5 +1,11 @@
 package com.tplite.core_banking.module.admin.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+@Getter
+@Setter
+@NoArgsConstructor
 public class AdminDashboardResponse {
     private long totalUsers;
     private long totalCustomers;
