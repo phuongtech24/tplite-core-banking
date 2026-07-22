@@ -93,7 +93,7 @@ Bank_Core/
 |   |   |-- application.yml
 |   |   |-- db/migration/
 |   |-- src/test/java/
-|-- docker-compose.kafka.yml
+|-- infra/docker/docker-compose.kafka.yml
 |-- CLAUDE.md
 ```
 
@@ -123,7 +123,7 @@ JWT_SECRET=change_me_to_at_least_32_bytes_secret_key
 ### 3. Chay Kafka neu muon test notification event
 
 ```bash
-docker compose -f docker-compose.kafka.yml up -d
+docker compose -f infra/docker/docker-compose.kafka.yml up -d
 ```
 
 Neu Docker khong pull duoc image tu Docker Hub, day la loi DNS/proxy/network local, khong phai loi code.
