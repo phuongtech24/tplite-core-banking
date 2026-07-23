@@ -27,8 +27,8 @@ public abstract class BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "voided", nullable = false)
-    private boolean voided = false;
+    @Column(name = "voided")
+    private Boolean voided = false;
 
     public UUID getId() {
         return id;
@@ -55,10 +55,10 @@ public abstract class BaseEntity {
     }
 
     public boolean isVoided() {
-        return voided;
+        return Boolean.TRUE.equals(voided);
     }
 
-    public void setVoided(boolean voided) {
+    public void setVoided(Boolean voided) {
         this.voided = voided;
     }
 
