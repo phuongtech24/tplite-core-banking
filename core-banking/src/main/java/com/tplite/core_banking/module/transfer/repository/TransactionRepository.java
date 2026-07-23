@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,11 +20,20 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     Optional<Transaction> findByIdempotencyKey(String idempotencyKey);
 
-    @Query("""
+    @EntityGraph(attributePaths = {"fromAccount", "toAccount"})
+    @Query(
+            value = """
             SELECT t
             FROM Transaction t
             WHERE t.fromAccount.user = :user
                OR t.toAccount.user = :user
-            """)
+            """,
+            countQuery = """
+            SELECT COUNT(t)
+            FROM Transaction t
+            WHERE t.fromAccount.user = :user
+               OR t.toAccount.user = :user
+            """
+    )
     Page<Transaction> findUserTransactions(@Param("user") User user, Pageable pageable);
 }
