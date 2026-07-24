@@ -1,7 +1,10 @@
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: tplite-core-banking
 

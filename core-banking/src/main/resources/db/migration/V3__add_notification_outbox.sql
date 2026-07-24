@@ -1,3 +1,19 @@
+CREATE TABLE IF NOT EXISTS notifications (
+    id UUID PRIMARY KEY,
+    event_id UUID,
+    user_id UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    notification_type VARCHAR(30) NOT NULL,
+    channel VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    read_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    voided BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 CREATE TABLE IF NOT EXISTS notification_outbox_events (
     id UUID PRIMARY KEY,
     aggregate_type VARCHAR(100) NOT NULL,
@@ -25,3 +41,6 @@ ALTER TABLE notifications
 CREATE UNIQUE INDEX IF NOT EXISTS uk_notifications_event_id
     ON notifications (event_id)
     WHERE event_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_status_created_at
+    ON notifications (user_id, status, created_at DESC);
