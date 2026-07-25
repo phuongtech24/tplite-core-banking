@@ -11,5 +11,7 @@ import com.tplite.core_banking.module.user.entity.User;
 public interface AuditLogService {
     void record(User actorUser, String action, String resourceType, UUID resourceId, String description);
 
+    void recordInNewTransaction(User actorUser, String action, String resourceType, UUID resourceId, String description);
+
     PageResponse<AuditLogResponse> searchAuditLogs(String keyword, String action, String resourceType, Pageable pageable);
 }
